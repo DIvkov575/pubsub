@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Using Huge Pages on Linux | Erik Rigtorp</title>
+	<meta name="description" content="In this article I will explain when and how to use huge pages."/>
+	<meta name="author" content="Erik Rigtorp">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Using huge pages on Linux"/>
+<meta name="twitter:description" content="In this article I will explain when and how to use huge pages."/>
+
+	<meta name="twitter:site" content="@rigtorp"/>
+	<meta name="twitter:creator" content="@rigtorp"/>
+	<meta property="og:title" content="Using huge pages on Linux" />
+<meta property="og:description" content="In this article I will explain when and how to use huge pages." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://rigtorp.se/hugepages/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2020-10-08T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-12-07T12:31:07+01:00" />
+
+
+
+	<link rel="canonical" href="https://rigtorp.se/hugepages/"/>
+	<link rel="icon" href="/favicon.svg"/>
+	<link rel="stylesheet" href="/css/style.css"/>
+	<link rel="stylesheet" href="/css/syntax.css"/>
+	
+</head>
+<body>
+	<header>
+	<a href="https://rigtorp.se">Erik Rigtorp</a>
+	
+</header>
+<hr>
+	<main>
+		<article>
+			<h1>Using huge pages on Linux</h1>
+			<time>2020-10-08</time>
+			<div>
+				<p>In this article I will explain when and how to use huge pages.</p>
+<p>Workloads that performs random memory access' to a big working set can be
+limited by <a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer">translation lookaside buffer (TLB)</a> misses. You can reduce TLB
+misses by utilizing page sizes larger than the default 4 KiB. These larger pages
+are often referred to as <em>huge pages</em>. I will focus on how to utilize huge pages
+for program data, but huge pages can also be used for instruction data.</p>
+<h2 id="determining-if-huge-pages-are-beneficial">Determining if huge pages are beneficial</h2>
+<p>To demonstrate when the TLB can become a bottleneck I wrote a sample program
+<a href="/hugepages.cpp"><em>hugepages.cpp</em></a> that uses a large hash table. Since each
+bucket is randomly accessed this program will perform random memory access'
+across a large working set.</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;absl/container/flat_hash_map.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;nmmintrin.h&gt; // _mm_crc32_u64</span><span class="cp">
+</span><span class="cp"></span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="nc">hash</span> <span class="p">{</span>
+    <span class="n">size_t</span> <span class="k">operator</span><span class="p">()(</span><span class="n">size_t</span> <span class="n">h</span><span class="p">)</span> <span class="k">const</span> <span class="k">noexcept</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_mm_crc32_u64</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span> <span class="p">}</span>
+  <span class="p">};</span>
+
+  <span class="n">size_t</span> <span class="n">iters</span> <span class="o">=</span> <span class="mi">10000000</span><span class="p">;</span>
+  <span class="n">absl</span><span class="o">::</span><span class="n">flat_hash_map</span><span class="o">&lt;</span><span class="n">size_t</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">hash</span><span class="o">&gt;</span> <span class="n">ht</span><span class="p">;</span>
+  <span class="n">ht</span><span class="p">.</span><span class="n">reserve</span><span class="p">(</span><span class="n">iters</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">iters</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">ht</span><span class="p">.</span><span class="n">try_emplace</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div><p>Compile the sample program:</p>
+<pre><code class="language-console" data-lang="console">g++ -std=c++17 -O3 -mavx -DNDEBUG hugepages.cpp /usr/lib64/libabsl_*
+</code></pre><p>Run it with perf to collect relevant performance counters:</p>
+<pre><code class="language-console" data-lang="console">$ perf stat -e 'faults,dTLB-loads,dTLB-load-misses,cache-misses,cache-references' ./a.out
+
+ Performance counter stats for './a.out':
+
+            70,080      faults:u                                                    
+        20,802,877      dTLB-loads:u                                                
+        19,436,707      dTLB-load-misses:u        #   93.43% of all dTLB cache hits 
+        32,872,323      cache-misses:u            #   52.279 % of all cache refs    
+        62,878,289      cache-references:u                                          
+
+       0.708913859 seconds time elapsed
+
+       0.623564000 seconds user
+       0.076544000 seconds sys
+</code></pre><p>I ran this on a AMD Ryzen 3900X CPU which has a 2048 entry L2 TLB. Using the
+default 4 KiB page size the TLB can handle a working set size of up to 8 MiB
+(2048 * 4 KiB). We see here that almost every last level cache (LLC) (also
+commonly referred to as L3 cache) miss results in a TLB miss. This is because
+our working set is much larger than 8 MiB.</p>
+<p>When you see large TLB miss to LLC miss ratios it&rsquo;s time to investigate if huge
+pages can help improve performance.</p>
+<h2 id="using-transparent-huge-pages-thp">Using transparent huge pages (THP)</h2>
+<p><a href="https://www.kernel.org/doc/html/latest/admin-guide/mm/transhuge.html">Linux <em>transparent huge page</em> (THP)
+support</a>
+allows the kernel to automatically promote regular memory pages into huge pages.</p>
+<p>By default THP is <code>madvise</code> mode in which case it&rsquo;s necessary to call
+<a href="https://man7.org/linux/man-pages/man2/madvise.2.html"><code>madvise(...MADV_HUGEPAGE)</code></a> to specifically enable THP for a range of
+memory.</p>
+<p>Linux <em>transparent huge page</em> (THP) support does not guarantee that huge pages
+will be allocated. If you use <a href="https://www.man7.org/linux/man-pages/man3/posix_memalign.3.html"><code>posix_memalign</code></a> to allocate
+memory aligned to the huge page size it&rsquo;s more likely that memory will be backed
+by huge pages:</p>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">nullptr</span><span class="p">;</span>
+<span class="n">posix_memalign</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ptr</span><span class="p">,</span> <span class="n">huge_page_size</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+<span class="n">madvise</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">MADV_HUGEPAGE</span><span class="p">);</span>
+</code></pre></div><p>In C++ we can achieve this using a <a href="https://en.cppreference.com/w/cpp/named_req/Allocator">custom allocator</a>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;   // posix_memalign</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/mman.h&gt; // madvise</span><span class="cp">
+</span><span class="cp"></span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="nc">thp_allocator</span> <span class="p">{</span>
+  <span class="k">constexpr</span> <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">huge_page_size</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">21</span><span class="p">;</span> <span class="c1">// 2 MiB
+</span><span class="c1"></span>  <span class="k">using</span> <span class="n">value_type</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+
+  <span class="n">thp_allocator</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">U</span><span class="o">&gt;</span>
+  <span class="k">constexpr</span> <span class="n">thp_allocator</span><span class="p">(</span><span class="k">const</span> <span class="n">thp_allocator</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="p">)</span> <span class="k">noexcept</span> <span class="p">{}</span>
+
+  <span class="n">T</span> <span class="o">*</span><span class="nf">allocate</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">bad_alloc</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="n">posix_memalign</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">,</span> <span class="n">huge_page_size</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">));</span>
+    <span class="n">madvise</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="n">MADV_HUGEPAGE</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">bad_alloc</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="nf">deallocate</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> <span class="n">std</span><span class="o">::</span><span class="n">free</span><span class="p">(</span><span class="n">p</span><span class="p">);</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div><p>See <a href="/hugepages.cpp"><em>hugepages.cpp</em></a> for example usage.</p>
+<p>Using this <code>posix_memalign</code> trick only makes sense for large allocations that
+are at least one huge page in size. If you want use THP with your C standard
+library (libc) allocator you can enable THP system wide for all allocations with
+the following command:</p>
+<pre><code class="language-console" data-lang="console">echo always &gt;/sys/kernel/mm/transparent_hugepage/enabled
+</code></pre><p>If you know the addresses and sizes of your heap allocator&rsquo;s arenas you could
+use <code>madvise(...MADV_HUGEPAGE)</code> to enable THP for the arenas.</p>
+<p>There are potential performance issues to using THP. You can read about it in
+<a href="/virtual-memory">my article on virtual memory</a>.</p>
+<h2 id="allocating-huge-pages-using-mmap">Allocating huge pages using <code>mmap</code></h2>
+<p>You can allocate huge pages using <a href="https://www.man7.org/linux/man-pages/man2/mmap.2.html"><code>mmap(...MAP_HUGETLB)</code></a>. Either as a
+anonymous mapping or a named mapping on <em>hugetlbfs</em>. The size of a huge page
+mapping needs to be a multiple of the page size. For example to create an
+anonymous mapping of 8 huge pages of the default size of 2 MiB on AMD64 /
+x86-64:</p>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">21</span><span class="p">),</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span>
+                 <span class="n">MAP_PRIVATE</span> <span class="o">|</span> <span class="n">MAP_ANONYMOUS</span> <span class="o">|</span> <span class="n">MAP_HUGETLB</span><span class="p">,</span>
+                 <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</code></pre></div><p>If you need a named huge page mapping you instead <code>mmap</code> a file descriptor
+referring to a file on a <em>hugetlbfs</em> filesystem.</p>
+<p>Huge pages are allocated from a reserved pool. You can reserve huge pages using
+the kernel command line parameter <code>hugepages</code> or at runtime using a <em>procfs</em> or
+<em>sysfs</em> interface. Read the <a href="https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html">Linux kernel documentation on huge
+pages</a> for more information on how to reserve huge pages. The
+simplest way to reserve huge pages of the default size is to use the <em>procfs</em>
+interface:</p>
+<pre><code class="language-console" data-lang="console">echo 20 &gt; /proc/sys/vm/nr_hugepages
+</code></pre><p>In C++ we can use a <a href="https://en.cppreference.com/w/cpp/named_req/Allocator">custom allocator</a> to enable containers to use
+huge pages:</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;sys/mman.h&gt; // mmap, munmap</span><span class="cp">
+</span><span class="cp"></span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="nc">huge_page_allocator</span> <span class="p">{</span>
+  <span class="k">constexpr</span> <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">huge_page_size</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">21</span><span class="p">;</span> <span class="c1">// 2 MiB
+</span><span class="c1"></span>  <span class="k">using</span> <span class="n">value_type</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+
+  <span class="n">huge_page_allocator</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">U</span><span class="o">&gt;</span>
+  <span class="k">constexpr</span> <span class="n">huge_page_allocator</span><span class="p">(</span><span class="k">const</span> <span class="n">huge_page_allocator</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="p">)</span> <span class="k">noexcept</span> <span class="p">{}</span>
+
+  <span class="n">size_t</span> <span class="nf">round_to_huge_page_size</span><span class="p">(</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(((</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">huge_page_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">huge_page_size</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">T</span> <span class="o">*</span><span class="nf">allocate</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">size_t</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">bad_alloc</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">auto</span> <span class="n">p</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">mmap</span><span class="p">(</span>
+        <span class="k">nullptr</span><span class="p">,</span> <span class="n">round_to_huge_page_size</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">)),</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span>
+        <span class="n">MAP_PRIVATE</span> <span class="o">|</span> <span class="n">MAP_ANONYMOUS</span> <span class="o">|</span> <span class="n">MAP_HUGETLB</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="n">MAP_FAILED</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">bad_alloc</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="nf">deallocate</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">munmap</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">round_to_huge_page_size</span><span class="p">(</span><span class="n">n</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div><p>See <a href="/hugepages.cpp"><em>hugepages.cpp</em></a> for example usage.</p>
+<p>Using the above allocator only makes sense with <code>std::vector</code>,
+<a href="https://abseil.io/docs/cpp/guides/container"><code>absl::flat_hash_map</code></a>, <a href="https://github.com/rigtorp/HashMap"><code>rigtorp::HashMap</code></a> and similar
+containers that performs few but big allocations. The C++ standards proposal
+<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p0401r3.html">P0401R3 Providing size feedback in the Allocator
+interface</a>
+would make this type of custom allocator more useful by returning the actual
+page size rounded size. I have implemented support for this proposal in my
+concurrent ring buffer library
+<a href="https://github.com/rigtorp/SPSCQueue/blob/master/src/SPSCQueueExampleHugepages.cpp">SPSCQueue</a>.</p>
+<h2 id="using-huge-pages-for-heap-allocations-with-mimalloc">Using huge pages for heap allocations with mimalloc</h2>
+<p><a href="https://github.com/microsoft/mimalloc"><em>mimalloc</em></a> is a recently developed (as of 2020) general purpose
+allocator that has excellent performance and great support for huge pages. By
+default it enables transparent huge pages (THP) using
+<code>madvise(...MADV_HUGEPAGE)</code> and supports enabling use of 2 MiB and 1 GiB huge
+pages on AMD64 / x86-64.</p>
+<p>Running the original example using 2 MiB pages:</p>
+<pre><code class="language-console" data-lang="console">$ perf stat -e 'faults,dTLB-loads,dTLB-load-misses,cache-misses,cache-references' \
+      env MIMALLOC_EAGER_COMMIT_DELAY=0 MIMALLOC_LARGE_OS_PAGES=1 LD_PRELOAD=./libmimalloc.so ./a.out
+
+ Performance counter stats for './a.out':
+
+               658      faults:u                                                    
+         8,717,125      dTLB-loads:u                                                
+             6,320      dTLB-load-misses:u        #    0.07% of all dTLB cache hits 
+        23,104,208      cache-misses:u            #   64.034 % of all cache refs    
+        36,081,035      cache-references:u                                          
+
+       0.543847504 seconds time elapsed
+
+       0.511986000 seconds user
+       0.029820000 seconds sys
+</code></pre><p>We can see a huge reduction TLB misses and the program completed faster. On the
+same AMD Ryzen 3900X CPU as before the L2 TLB can hold 2048 entries of 2 MiB
+pages. This translates to a working set size of 4 GiB (2048 * 2 MiB) when using
+2 MiB pages.</p>
+<p>Running the original example using 1 GiB pages:</p>
+<pre><code class="language-console" data-lang="console">$ perf stat -e 'faults,dTLB-loads,dTLB-load-misses,cache-misses,cache-references' \
+    env MIMALLOC_EAGER_COMMIT_DELAY=0 MIMALLOC_RESERVE_HUGE_OS_PAGES=4 LD_PRELOAD=libmimalloc.so ./a.out
+
+ Performance counter stats for './a.out':
+
+               532      faults                                                      
+           639,907      dTLB-loads                                                  
+             7,869      dTLB-load-misses          #    1.23% of all dTLB cache hits 
+        25,401,262      cache-misses              #   35.908 % of all cache refs    
+        70,739,506      cache-references                                            
+
+       0.598358478 seconds time elapsed
+
+       0.506471000 seconds user
+       0.089488000 seconds sys
+</code></pre><p>To reserve 1 GiB pages I had to add <code>hugepagesz=1G hugepages=4</code> to the kernel
+command line. In this case there were no improvement since the working set
+already fits in the L2 TLB when using 2 MiB pages.</p>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="https://github.com/libhugetlbfs/libhugetlbfs">libhugetlbfs</a> can be used to put instruction data (as opposed
+to only program data) on huge pages.</li>
+<li><a href="http://jemalloc.net/">jemalloc</a> seems to have some support for THP.</li>
+<li><a href="https://wiki.debian.org/Hugepages">https://wiki.debian.org/Hugepages</a></li>
+<li><a href="https://access.redhat.com/solutions/320303">How do I check for hugepages usage and what is using
+it?</a></li>
+</ul>
+
+			</div>
+			
+			
+		</article>
+	</main>
+<aside>
+	<div>
+		<div>
+			<h3>Other posts</h3>
+		</div>
+		<div>
+			<ul	>
+				
+				<li><a href="/ringbuffer/">Optimizing a ring buffer for throughput</a></li>
+				
+				<li><a href="/hugepages/">Using huge pages on Linux</a></li>
+				
+				<li><a href="/fuzzing-floating-point-code/">Fuzzing floating point code</a></li>
+				
+				<li><a href="/generating-ostream-operator/">Generating std::ostream &amp;operator&lt;&lt; for C&#43;&#43; enums and structs using libClang</a></li>
+				
+				<li><a href="/sockets/">Tips for using the sockets API</a></li>
+				
+				<li><a href="/iife/">Uses of immediately invoked function expressions (IIFE) in C&#43;&#43;</a></li>
+				
+				<li><a href="/virtual-memory/">Latency implications of virtual memory</a></li>
+				
+				<li><a href="/isatomic/">Aligned AVX loads and stores are atomic</a></li>
+				
+				<li><a href="/spinlock/">Correctly implementing a spinlock in C&#43;&#43;</a></li>
+				
+				<li><a href="/low-latency-guide/">Low latency tuning guide</a></li>
+				
+				<li><a href="/split-locks/">Performance impact of split locks</a></li>
+				
+				<li><a href="/cpp-best-practices/">C&#43;&#43; Best Practices</a></li>
+				
+				<li><a href='/2013/06/08/estimating-order-queue-position'>Estimating order queue position</a></li>
+				
+				<li><a href='/2012/11/22/feed-handler'>Designing a high performance market data feed handler</a></li>
+				
+				<li><a href='/2011/01/01/rolling-statistics-numpy'>Efficient rolling statistics with NumPy</a></li>
+				
+				<li><a href='/latency'>Erlang Latency Guide</a></li>
+				
+			</ul>
+		</div>
+	</div>
+</aside>
+
+
+	<hr><footer>
+	<p>
+		&copy; 2022 <a href="https://rigtorp.se">Erik Rigtorp</a>
+		&lt;<a href="mailto:erik@rigtorp.se">erik@rigtorp.se</a>&gt;
+		<a href="https://github.com/rigtorp" rel="me">GitHub</a>
+		<a href="https://www.linkedin.com/in/rigtorp" rel="me">LinkedIn</a>
+	</p>
+</footer>
+
+	<script data-goatcounter="https://rigtorp.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

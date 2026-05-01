@@ -1,0 +1,352 @@
+<html><head>
+
+            <meta id="book-resource-type" name="book-resource-type" content="Guide">
+            <meta id="book-title" name="book-title" content="iOS Manual Pages">
+            <meta id="book-root" name="book-root" content="./">
+            <meta id="devcenter" name="devcenter" content="Mac Dev Center">
+            <meta id="devcenter-url" name="devcenter-url" content="http://developer.apple.com/devcenter/mac">
+            <meta id="reflib" name="reflib" content="Documentation Archive">
+            <meta id="book-assignments" name="book-assignments" content="{Type/Guide}, {Technologies/Core OS Layer/System}">
+            <meta scheme="apple_ref" id="identifier" name="identifier" content="//apple_ref/doc/uid/TP40007259">
+            <meta id="document-version" name="document-version" content="1.4.0">
+            <meta id="build" name="build" content="c1e4c7a89af8f899a21cfa81fc33ba42" />
+            <meta id="description" name="description" content="HTML versions of the iOS man pages.">
+            <meta id="resources-uri" name="resources-uri" content="../../../../../Resources/1282/">
+            <meta id="Generator" name="Generator" content="Gutenberg Static e43202ea08">
+            <meta id="Copyright" name="Copyright" content="Copyright 2018 Apple Inc. All Rights Reserved.">
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+            <meta id="platforms" name="platforms" content="iOS">
+<link rel="stylesheet" type="text/css" href="../../../../../Resources/1282/CSS/screen.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../Resources/1282/CSS/feedback.css" />
+<title>Mac OS X
+ Manual Page For mmap(2)</title>
+<style type="text/css"><!-- @import "/adcstyle.css"; .char {background: #ffffff; color:#0000ff;}.comment {background:#ffffff; color:#236e25}.function {background:#ffffff; color:#000000;}.keyword {background:#ffffff; color:#761550;}.number {background: #ffffff; color:#0000ff;}.param {background:#ffffff; color:#000000;}.preprocessor {background:#ffffff; color:#236e25}.string {background: #ffffff; color:#891315;}.template {background:#ffffff; color:#761550;}.type {background:#ffffff; color:#761550;}.var {background:#ffffff; color:#000000;} pre.manpages {font-size: 10pt;} .graybox { border-top: 1px solid #919699; border-left: 1px solid #919699; margin-bottom: 10px; } .graybox th { padding: 4px 8px 4px 8px; background: #E2E2E2; font-size: 12px; font-weight: bold; border-bottom: 1px solid #919699; border-right: 1px solid #919699; } .graybox td { padding: 8px; font-size: 12px; text-align: left; vertical-align: top; border-bottom: 1px solid #919699; border-right: 1px solid #919699; } .whiteout { font-size: 1px; background: #ffffff; color: #ffffff; } --></style>
+<style type="text/css" media="print, aural, braille, embossed, projection, tty"><!-- @import "/adcstyle.css"; .char {background: #ffffff; color:#0000ff;}.comment {background:#ffffff; color:#236e25}.function {background:#ffffff; color:#000000;}.keyword {background:#ffffff; color:#761550;}.number {background: #ffffff; color:#0000ff;}.param {background:#ffffff; color:#000000;}.preprocessor {background:#ffffff; color:#236e25}.string {background: #ffffff; color:#891315;}.template {background:#ffffff; color:#761550;}.type {background:#ffffff; color:#761550;}.var {background:#ffffff; color:#000000;} pre.manpages {font-size: 10pt;} .graybox { border-top: 1px solid #919699; border-left: 1px solid #919699; margin-bottom: 10px; } .graybox th { padding: 4px 8px 4px 8px; background: #E2E2E2; font-size: 12px; font-weight: bold; border-bottom: 1px solid #919699; border-right: 1px solid #919699; } .graybox td { padding: 8px; font-size: 12px; text-align: left; vertical-align: top; border-bottom: 1px solid #919699; border-right: 1px solid #919699; } .whiteout { display: none; } --></style>
+
+</head>
+<body bgcolor="white" id="StaticPage"><body bgcolor="white">
+
+            <div id="adcHeader" class="hideOnPrint hideInXcodeSC">
+                <div id='ssi_Header' class="hideInXcodeSC unified">
+                    <a id="ssi_LibraryTitle" href='../../../../../navigation/'>Documentation Archive</a>
+                    <a id="ssi_AppleDeveloperConnection" href='https://developer.apple.com/'>Developer</a>
+                    <div id='ssi_SearchButton' role="button" title="Search">Search</div>
+                </div>
+                <form id='ssi_SearchMenu' method='get' action='../../../../../search/' accept-charset='utf-8'>
+                    <label for='adcsearch'>Search Documentation Archive</label>
+                    <input type='search' id='ssi_SearchField' name='q' accesskey='s' results='5' />
+                </form>
+            </div>
+            <header id="header">
+                <div id="title" role="banner">
+                    <h1>iOS Manual Pages</h1>
+                    <span id="file_links">
+                        <a id="PDF_link" role="button" tabindex='4' rel="alternate" title="Download PDF"><span id="pdf_icon"></span>PDF</a>
+                        <a id="Companion_link" role="button" tabindex='3' title="Download Companion File"><span id="companion_icon"></span>Companion File</a>
+                    </span>
+                </div>
+                <ul id="headerButtons" class="hideOnPrint" role="toolbar">
+                    <li id="toc_button" style="display:none">
+                        <button tabindex="5" id="table_of_contents" class="open" role="checkbox" aria-label="Show Table of Contents">
+                        <span class="disclosure"></span>Table of Contents</button>
+                    </li>
+                    <li id="jumpto_button" style="display:none" role="navigation">
+                        <select tabindex="6" id="jumpTo">
+                            <option value="top"><<Jump To&#133;>></option>
+                        </select>
+                    </li>
+                    <li id="downloadSample_button" style="display:none">
+                        <a id="Sample_link"><button id="Sample_button">Download Sample Code</button></a>
+                    </li>
+                </ul>
+            </header>
+            <nav id="tocContainer" class="" tabindex="7">
+                <ul id="toc" role="tree"></ul>
+            </nav>
+            <article id="contents">
+              
+<a name="//apple_ref/doc/man/2/mmap" title="Mac OS X
+ Manual Page for mmap(2)"><!-- headerDoc=man; indexgroup=Section 2; uid="//apple_ref/doc/man/2/mmap"; name=mmap(2) --></a>
+
+<table width=600><tr><td scope="row">
+<!-- begin breadcrumb insert request --><font face="Geneva,Helvetica,Arial" size="1">
+ <a target="_top" href="http://developer.apple.com">ADC Home</a> <b>&gt;</b> <a href="../../../../../navigation/redirect.html#//apple_ref/doc/uid/TP30000943" data-renderer-version="1" target="_top">Reference Library</a> <b>&gt;</b> <!-- a href="" target="_top" -->Reference<!-- /a --> <b>&gt;</b> <!-- a href="" target="_top" -->Mac OS X<!-- /a --> <b>&gt;</b> <!-- a href="" target="_top" -->Mac OS X Man Pages<!-- /a --></font>
+<!-- end breadcrumb insert request -->
+<p>&nbsp;</p>
+</td></tr></table>
+<!-- end of header -->
+<table border="0"  cellpadding="2" cellspacing="2" width="630pt"><tr><td valign="top" height="12" colspan="5" scope="row">
+<p style='text-align:justify;'>This document is a Mac OS X manual page.  Manual pages are a command-line technology
+for providing documentation.  You can view these manual pages locally using the
+<!-- a -->man(1)<!-- /a --> command.
+These manual pages come from many different sources, and thus, have a variety of writing
+styles.</p>
+<p style='text-align:justify;'>For more information about the manual page format, see the manual page for 
+<a href="../man5/manpages.5.html#//apple_ref/doc/man/5/manpages"  data-renderer-version="1">manpages(5)</a>.</p>
+</td></tr></table>
+<hr />
+<table border="0"  cellpadding="2" cellspacing="2" width="300"><tr><td valign="top" height="12" colspan="5" scope="row"><pre class="manpages"><tt>
+MMAP(2)                     BSD System Calls Manual                    MMAP(2)
+
+<b>NAME</b>
+     <b>mmap</b> -- map files or devices into memory
+
+<b>SYNOPSIS</b>
+     <b>#include</b> <b>&lt;sys/mman.h&gt;</b>
+
+     <u>void</u> <u>*</u>
+     <b>mmap</b>(<u>void</u> <u>*addr</u>, <u>size</u><b>_</b><u>t</u> <u>len</u>, <u>int</u> <u>prot</u>, <u>int</u> <u>flags</u>, <u>int</u> <u>fildes</u>,
+         <u>off</u><b>_</b><u>t</u> <u>offset</u>);
+
+<b>DESCRIPTION</b>
+     The <b>mmap</b> function causes the pages starting at <u>addr</u> and continuing for at
+     most <u>len</u> bytes to be mapped from the object described by <u>fildes</u>, starting
+     at byte offset <u>offset</u>.  If <u>offset</u> or <u>len</u> is not a multiple of the page-<font color="#ffffff" class="whiteout">size,&nbsp;pagesize,</font>
+     size, the mapped region may extend past the specified range.
+
+     If <u>addr</u> is non-zero, it is used as a hint to the system.  (As a conve-<font color="#ffffff" class="whiteout">nience&nbsp;convenience</font>
+     nience to the system, the actual address of the region may differ from
+     the address supplied.)  If <u>addr</u> is zero, an address will be selected by
+     the system.  The actual starting address of the region is returned.  A
+     successful <u>mmap</u> deletes any previous mapping in the allocated address
+     range.
+
+     The protections (region accessibility) are specified in the <u>prot</u> argument
+     by <u>or</u>'ing the following values:
+
+     PROT_EXEC   Pages may be executed.
+
+     PROT_READ   Pages may be read.
+
+     PROT_WRITE  Pages may be written.
+
+     The <u>flags</u> parameter specifies the type of the mapped object, mapping
+     options, and whether modifications made to the mapped copy of the page
+     are private to the process (copy-on-write) or are to be shared with other
+     references.  Sharing, mapping type, and options are specified in the
+     <u>flags</u> argument by <u>or</u>'ing the following values:
+
+     MAP_ANON           Map anonymous memory not associated with any specific
+                        file.  Mac OS X specific: the file descriptor used for
+                        creating MAP_ANON regions can be used to pass some
+                        Mach VM flags, and can be specified as -1 if no such
+                        flags are associated with the region.  Mach VM flags
+                        are defined in &lt;mach/vm_statistics.h&gt; and the ones
+                        that currently apply to <b>mmap</b> are:
+
+                        VM_FLAGS_PURGABLE   to create Mach purgable (i.e.
+                        volatile) memory VM_MAKE_TAG(tag)    to associate an
+                        8-bit tag with the region
+
+                        &lt;mach/vm_statistics.h&gt; defines some preset tags (with
+                        a VM_MEMORY_ prefix).  Users are encouraged to use
+                        tags between 240 and 255.  Tags are used by tools such
+                        as <!-- a -->vmmap(1)<!-- /a --> to help identify specific memory regions.
+
+     MAP_FILE           Mapped from a regular file or character-special device
+                        memory.  (This is the default mapping type, and need
+                        not be specified.)
+
+     MAP_FIXED          Do not permit the system to select a different address
+                        than the one specified.  If the specified address can-<font color="#ffffff" class="whiteout">not&nbsp;cannot</font>
+                        not be used, <b>mmap</b> will fail.  If MAP_FIXED is speci-<font color="#ffffff" class="whiteout">fied,&nbsp;specified,</font>
+                        fied, <u>addr</u> must be a multiple of the pagesize.  Use of
+                        this option is discouraged.
+
+     MAP_HASSEMAPHORE   Notify the kernel that the region may contain sema-<font color="#ffffff" class="whiteout">phores&nbsp;semaphores</font>
+                        phores and that special handling may be necessary.
+
+     MAP_PRIVATE        Modifications are private (copy-on-write).
+
+     MAP_SHARED         Modifications are shared.
+
+     MAP_NOCACHE        Pages in this mapping are not retained in the kernel's
+                        memory cache.  If the system runs low on memory, pages
+                        in MAP_NOCACHE mappings will be among the first to be
+                        reclaimed.  This flag is intended for mappings that
+                        have little locality and provides a hint to the kernel
+                        that pages in this mapping are unlikely to be needed
+                        again in the near future.
+
+     Conforming applications must specify either MAP_PRIVATE or MAP_SHARED.
+
+     The <a href="close.2.html#//apple_ref/doc/man/2/close"  data-renderer-version="1">close(2)</a> function does not unmap pages, see <a href="munmap.2.html#//apple_ref/doc/man/2/munmap"  data-renderer-version="1">munmap(2)</a> for further
+     information.
+
+     The current design does not allow a process to specify the location of
+     swap space.  In the future we may define an additional mapping type,
+     MAP_SWAP, in which the file descriptor argument specifies a file or
+     device to which swapping should be done.
+
+<b>RETURN</b> <b>VALUES</b>
+     Upon successful completion, <b>mmap</b> returns a pointer to the mapped region.
+     Otherwise, a value of -1 is returned and <u>errno</u> is set to indicate the
+     error.
+
+<b>ERRORS</b>
+     <b>Mmap</b>() will fail if:
+
+     [EACCES]           <u>Fildes</u> is not open for reading.
+
+     [EACCES]           The flags PROT_WRITE and MAP_SHARED are specified as
+                        part of the <u>flags</u> and <u>prot</u> parameters and <u>fildes</u> is
+                        not open for writing.
+
+     [EBADF]            <u>fildes</u> is not a valid file descriptor for an open
+                        file.
+
+     [EINVAL]           MAP_FIXED is specified and the parameter is not page
+                        aligned.
+
+     [EINVAL]           <u>fildes</u> does not reference a regular or character spe-<font color="#ffffff" class="whiteout">cial&nbsp;special</font>
+                        cial file.
+
+     [EINVAL]           <u>flags</u> does not include either MAP_PRIVATE or
+                        MAP_SHARED.
+
+     [EINVAL]           <u>len</u> is not greater than zero.
+
+     [EINVAL]           <u>offset</u> is not a multiple of the page size, as returned
+                        by <a href="../man3/sysconf.3.html#//apple_ref/doc/man/3/sysconf"  data-renderer-version="1">sysconf(3)</a>.
+
+     [EMFILE]           The limit on mapped regions (per process or system) is
+                        exceeded.
+
+     [ENODEV]           The file type for <u>fildes</u> is not supported for mapping.
+
+     [ENOMEM]           MAP_FIXED is specified and the address range specified
+                        exceeds the address space limit for the process.
+
+     [ENOMEM]           MAP_FIXED is specified and the address specified by
+                        the <u>addr</u> parameter isn't available.
+
+     [ENOMEM]           MAP_ANON is specified and insufficient memory is
+                        available.
+
+     [ENXIO]            Addresses in the specified range are invalid for
+                        fildes.
+
+     [EOVERFLOW]        Addresses in the specified range exceed the maximum
+                        offset set for fildes.
+
+<b>LEGACY</b> <b>SYNOPSIS</b>
+     <b>#include</b> <b>&lt;sys/types.h&gt;</b>
+     <b>#include</b> <b>&lt;sys/mman.h&gt;</b>
+
+     The include file &lt;<u>sys/types.h&gt;</u> is necessary.
+
+<b>COMPATIBILITY</b>
+     <b>mmap</b>() now returns with <u>errno</u> set to EINVAL in places that historically
+     succeeded.  The rules have changed as follows:
+
+     <b></b><b><u>oo</u></b>   The <u>flags</u> parameter must specify either MAP_PRIVATE or MAP_SHARED.
+
+     <b></b><b><u>oo</u></b>   The <u>size</u> parameter must not be 0.
+
+     <b></b><b><u>oo</u></b>   The <u>off</u> parameter must be a multiple of pagesize, as returned by
+         <b>sysconf</b>().
+
+<b>SEE</b> <b>ALSO</b>
+     <!-- a -->getpagesize(2)<!-- /a -->, <a href="madvise.2.html#//apple_ref/doc/man/2/madvise"  data-renderer-version="1">madvise(2)</a>, <a href="mincore.2.html#//apple_ref/doc/man/2/mincore"  data-renderer-version="1">mincore(2)</a>, <a href="mlock.2.html#//apple_ref/doc/man/2/mlock"  data-renderer-version="1">mlock(2)</a>, <a href="mprotect.2.html#//apple_ref/doc/man/2/mprotect"  data-renderer-version="1">mprotect(2)</a>, <a href="msync.2.html#//apple_ref/doc/man/2/msync"  data-renderer-version="1">msync(2)</a>,
+     <a href="munmap.2.html#//apple_ref/doc/man/2/munmap"  data-renderer-version="1">munmap(2)</a>, <a href="../man3/sysconf.3.html#//apple_ref/doc/man/3/sysconf"  data-renderer-version="1">sysconf(3)</a>, <!-- a -->compat(5)<!-- /a -->
+
+4th Berkeley Distribution        June 4, 1993        4th Berkeley Distribution
+</tt></pre>
+</td></tr></table>
+<div id="blackout">
+    <div id="preload"></div>
+</div>
+<div id="modal" aria-hidden="true">
+    <div id="closebox" tabindex="0" aria-label="Close feedback form" role="button"></div>
+    <div id="sending" class="hidden">
+        <h2 tabindex="0">Sending feedback&hellip;</h2>
+        <div id="sending_img"></div>
+    </div>
+    <div id="error" class="hidden">
+        <h2 tabindex="0">We&rsquo;re sorry, an error has occurred.</h2>
+        <p>Please try submitting your feedback later.</p>
+        <div id="error_icon"></div>
+    </div>
+    <div id="success" class="hidden">
+        <h2 tabindex="0">Thank you for providing feedback!</h2>
+        <p>Your input helps improve our developer documentation.</p>
+        <div id="thank_you_icon"></div>
+    </div>
+    
+    <form id="feedback" action="#" method="post">
+        <div class="left-leaf">
+            <h2 id="helpful_title" data-asterisk="a1" tabindex="0">How helpful is this document?</h2>     
+            <sup id="a1" class="asterisk" aria-hidden="true">*</sup>
+
+            <div id="star_group" role="radiogroup" aria-required="true">
+                <label> 
+                    <input class="radio" type="radio" name="helped" value="1" /> 
+                    Very helpful
+                </label>
+                <label> 
+                    <input class="radio" type="radio" name="helped" value="2" /> 
+                    Somewhat helpful
+                </label>
+                <label>
+                    <input class="radio" type="radio" name="helped" value="3" /> 
+                    Not helpful
+                </label>
+            </div>
+        </div>
+        <div class="right-leaf">
+            <h2>How can we improve this document?</h2>
+            <div id="improve" class="checkboxes">
+                <label>
+                    <input type="checkbox" name="typo" /> 
+                    Fix typos or links
+                </label>
+                <label>
+                    <input type="checkbox" name="infoIncorrect" /> 
+                    Fix incorrect information
+                </label>
+                <label>
+                    <input type="checkbox" name="needs_examples" /> 
+                    Add or update code samples
+                </label>
+                <label>
+                    <input type="checkbox" name="needs_art" /> 
+                    Add or update illustrations
+                </label>
+                <label>
+                    <input type="checkbox" name="missingInfo" /> 
+                    Add information about...
+                </label>
+            </div>
+        </div>
+
+        <textarea id="comment" name="problem" cols="70" rows="8" placeholder="Please tell us more about your experience with this document" data-asterisk="a2" required></textarea>
+        <sup id="a2" class="asterisk" aria-hidden="true">*</sup>
+
+        <p class="fineprint">
+            <em aria-hidden="true"><span>*</span> Required information</em>
+        </p> 
+
+        <input id="submit" type="button" value="Send" />
+
+        <section id="legal">
+            <p>
+                To submit a product bug or enhancement request, please visit the 
+                <a href="https://developer.apple.com/bugreporter/" target="_blank">Bug Reporter</a> 
+                page.
+            </p>
+            <p>
+                Please read <a href="http://www.apple.com/legal/policies/ideas.html" target="_blank">Apple's Unsolicited Idea Submission Policy</a> 
+                before you send us your feedback.
+            </p> 
+        </section>
+    </form>
+</div>
+
+
+            </article>
+</body>
+<script type="text/javascript" src="../../../../../Resources/1282/JavaScript/lib/prototype.js"></script>
+<script type="text/javascript" src="../../../../../Resources/1282/JavaScript/library.js"></script>
+<script type="text/javascript" src="../../../../../Resources/1282/JavaScript/feedback.js"></script>
+
+</html>

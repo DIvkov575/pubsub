@@ -1,0 +1,244 @@
+From 4d4583e0a200057e33f8fef0efb41ad54b9df4be Mon Sep 17 00:00:00 2001
+From: David Carlier <devnexen@gmail.com>
+Date: Mon, 5 Aug 2019 14:00:15 +0100
+Subject: [PATCH] src: add large page support for macOS
+
+Proposal to bring the support for this platform.
+We assume the pse36 cpu flag is present for 2MB
+large page support present in recent years
+in mac line (not to be backported to 10.x anyway).
+Recommended better for mac production servers rather
+than casual mac books.
+
+PR-URL: https://github.com/nodejs/node/pull/28977
+Reviewed-By: Ben Noordhuis <info@bnoordhuis.nl>
+Reviewed-By: James M Snell <jasnell@gmail.com>
+---
+ configure.py                       |  8 ++-
+ node.gyp                           |  2 +-
+ src/large_pages/node_large_page.cc | 98 +++++++++++++++++++++++-------
+ 3 files changed, 83 insertions(+), 25 deletions(-)
+
+diff --git a/configure.py b/configure.py
+index beab9ceccce9ad..f1e09d9e98b9e9 100755
+--- a/configure.py
++++ b/configure.py
+@@ -1035,16 +1035,18 @@ def configure_node(o):
+   else:
+     o['variables']['node_use_dtrace'] = 'false'
+ 
+-  if options.node_use_large_pages and not flavor in ('linux', 'freebsd'):
++  if options.node_use_large_pages and not flavor in ('linux', 'freebsd', 'mac'):
+     raise Exception(
+-      'Large pages are supported only on Linux Systems.')
+-  if options.node_use_large_pages and flavor in ('linux', 'freebsd'):
++      'Large pages are supported only on Linux, FreeBSD and MacOS Systems.')
++  if options.node_use_large_pages and flavor in ('linux', 'freebsd', 'mac'):
+     if options.shared or options.enable_static:
+       raise Exception(
+         'Large pages are supported only while creating node executable.')
+     if target_arch!="x64":
+       raise Exception(
+         'Large pages are supported only x64 platform.')
++    if flavor == 'mac':
++      info('macOS server with 32GB or more is recommended')
+     if flavor == 'linux':
+       # Example full version string: 2.6.32-696.28.1.el6.x86_64
+       FULL_KERNEL_VERSION=os.uname()[2]
+diff --git a/node.gyp b/node.gyp
+index 4eae262a61e77b..4576e5a335c3e6 100644
+--- a/node.gyp
++++ b/node.gyp
+@@ -817,7 +817,7 @@
+             }],
+           ],
+         }],
+-        [ 'node_use_large_pages=="true" and OS in "linux freebsd"', {
++        [ 'node_use_large_pages=="true" and OS in "linux freebsd mac"', {
+           'defines': [ 'NODE_ENABLE_LARGE_CODE_PAGES=1' ],
+           # The current implementation of Large Pages is under Linux.
+           # Other implementations are possible but not currently supported.
+diff --git a/src/large_pages/node_large_page.cc b/src/large_pages/node_large_page.cc
+index d87ccfaa26abcd..f6f5e72c283632 100644
+--- a/src/large_pages/node_large_page.cc
++++ b/src/large_pages/node_large_page.cc
+@@ -30,6 +30,8 @@
+ #if defined(__FreeBSD__)
+ #include <sys/sysctl.h>
+ #include <sys/user.h>
++#elif defined(__APPLE__)
++#include <mach/vm_map.h>
+ #endif
+ #include <unistd.h>  // readlink
+ 
+@@ -212,6 +214,42 @@ static struct text_region FindNodeTextRegion() {
+     }
+     start += cursz;
+   }
++#elif defined(__APPLE__)
++  struct text_region nregion;
++  nregion.found_text_region = false;
++  struct vm_region_submap_info_64 map;
++  mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
++  vm_address_t addr = 0UL;
++  vm_size_t size = 0;
++  natural_t depth = 1;
++
++  while (true) {
++    if (vm_region_recurse_64(mach_task_self(), &addr, &size, &depth,
++                             reinterpret_cast<vm_region_info_64_t>(&map),
++                             &count) != KERN_SUCCESS) {
++      break;
++    }
++
++    if (map.is_submap) {
++      depth++;
++    } else {
++      char* start = reinterpret_cast<char*>(hugepage_align_up(addr));
++      char* end = reinterpret_cast<char*>(hugepage_align_down(addr+size));
++      size_t esize = end - start;
++
++      if (end > start && (map.protection & VM_PROT_READ) != 0 &&
++          (map.protection & VM_PROT_EXECUTE) != 0) {
++        nregion.found_text_region = true;
++        nregion.from = start;
++        nregion.to = end;
++        nregion.total_hugepages = esize / hps;
++        break;
++      }
++
++      addr += size;
++      size = 0;
++    }
++  }
+ #endif
+   return nregion;
+ }
+@@ -267,11 +305,15 @@ static bool IsSuperPagesEnabled() {
+ // 2: This function should not call any function(s) that might be moved.
+ // a. map a new area and copy the original code there
+ // b. mmap using the start address with MAP_FIXED so we get exactly
+-//    the same virtual address
++//    the same virtual address (except on macOS).
+ // c. madvise with MADV_HUGE_PAGE
+ // d. If successful copy the code there and unmap the original region
+ int
++#if !defined(__APPLE__)
+ __attribute__((__section__(".lpstub")))
++#else
++__attribute__((__section__("__TEXT,__lpstub")))
++#endif
+ __attribute__((__aligned__(hps)))
+ __attribute__((__noinline__))
+ MoveTextRegionToLargePages(const text_region& r) {
+@@ -289,6 +331,9 @@ MoveTextRegionToLargePages(const text_region& r) {
+     PrintSystemError(errno);
+     return -1;
+   }
++  OnScopeLeave munmap_on_return([nmem, size]() {
++    if (-1 == munmap(nmem, size)) PrintSystemError(errno);
++  });
+ 
+   memcpy(nmem, r.from, size);
+ 
+@@ -302,7 +347,6 @@ MoveTextRegionToLargePages(const text_region& r) {
+               MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1 , 0);
+   if (tmem == MAP_FAILED) {
+     PrintSystemError(errno);
+-    munmap(nmem, size);
+     return -1;
+   }
+ 
+@@ -313,11 +357,6 @@ MoveTextRegionToLargePages(const text_region& r) {
+     if (ret == -1) {
+       PrintSystemError(errno);
+     }
+-    ret = munmap(nmem, size);
+-    if (ret == -1) {
+-      PrintSystemError(errno);
+-    }
+-
+     return -1;
+   }
+ #elif defined(__FreeBSD__)
+@@ -327,32 +366,46 @@ MoveTextRegionToLargePages(const text_region& r) {
+               MAP_ALIGNED_SUPER, -1 , 0);
+   if (tmem == MAP_FAILED) {
+     PrintSystemError(errno);
+-    munmap(nmem, size);
+     return -1;
+   }
+-#endif
+-
+-  memcpy(start, nmem, size);
+-  ret = mprotect(start, size, PROT_READ | PROT_EXEC);
++#elif defined(__APPLE__)
++  // There is not enough room to reserve the mapping close
++  // to the region address so we content to give a hint
++  // without forcing the new address being closed to.
++  // We explicitally gives all permission since we plan
++  // to write into it.
++  tmem = mmap(start, size,
++              PROT_READ | PROT_WRITE | PROT_EXEC,
++              MAP_PRIVATE | MAP_ANONYMOUS,
++              VM_FLAGS_SUPERPAGE_SIZE_2MB, 0);
++  if (tmem == MAP_FAILED) {
++    PrintSystemError(errno);
++    return -1;
++  }
++  memcpy(tmem, nmem, size);
++  ret = mprotect(start, size, PROT_READ | PROT_WRITE | PROT_EXEC);
+   if (ret == -1) {
+     PrintSystemError(errno);
+     ret = munmap(tmem, size);
+     if (ret == -1) {
+       PrintSystemError(errno);
+     }
+-    ret = munmap(nmem, size);
+-    if (ret == -1) {
+-      PrintSystemError(errno);
+-    }
+     return -1;
+   }
++  memcpy(start, tmem, size);
++#else
++  memcpy(start, nmem, size);
++#endif
+ 
+-  // Release the old/temporary mapped region
+-  ret = munmap(nmem, size);
++  ret = mprotect(start, size, PROT_READ | PROT_EXEC);
+   if (ret == -1) {
+     PrintSystemError(errno);
++    ret = munmap(tmem, size);
++    if (ret == -1) {
++      PrintSystemError(errno);
++    }
++    return -1;
+   }
+-
+   return ret;
+ }
+ 
+@@ -369,7 +422,7 @@ int MapStaticCodeToLargePages() {
+     return MoveTextRegionToLargePages(r);
+ 
+   return -1;
+-#elif defined(__FreeBSD__)
++#elif defined(__FreeBSD__) || defined(__APPLE__)
+   return MoveTextRegionToLargePages(r);
+ #endif
+ }
+@@ -377,8 +430,11 @@ int MapStaticCodeToLargePages() {
+ bool IsLargePagesEnabled() {
+ #if defined(__linux__)
+   return IsTransparentHugePagesEnabled();
+-#else
++#elif defined(__FreeBSD__)
+   return IsSuperPagesEnabled();
++#elif defined(__APPLE__)
++  // pse-36 flag is present in recent mac x64 products.
++  return true;
+ #endif
+ }
+ 

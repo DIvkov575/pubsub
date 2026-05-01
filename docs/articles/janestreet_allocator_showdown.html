@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Jane Street Blog - Memory allocator showdown </title>
+  
+  <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport' />
+  <link href='//fonts.googleapis.com/css?family=Source+Code+Pro:500,600' rel='stylesheet' type='text/css'>
+  <link href="//cloud.webtype.com/css/91c6697f-d1f8-4e5e-815e-96f5e7970857.css" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/static/img/lambda_logo.ico">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" id="switch-style" href="/static/css/grid.css">
+  <link rel="alternate" type="application/atom+xml" title="Jane Street Blog" href="/feed.xml">
+  <meta name="twitter:title" content="Memory allocator showdown">
+<meta name="twitter:url" content="https://blog.janestreet.com/memory-allocator-showdown/">
+
+  <meta name="twitter:description" content="Since version 4.10, OCaml offers a new best-fit memory allocator alongside its existing default, the next-fit allocator. At Jane Street, we’ve seen a big imp...">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.janestreet.com/memory-allocator-showdown/MemoryAllocator.jpg">
+
+
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Memory allocator showdown">
+<meta property="og:description" content="Since version 4.10, OCaml offers a new best-fit memory allocator alongside its existing default, the next-fit allocator. At Jane Street, we’ve seen a big imp...">
+<meta property="og:url" content="https://blog.janestreet.com/memory-allocator-showdown/">
+<meta property="og:site_name" content="Jane Street Blog">
+<meta property="og:image" content="https://blog.janestreet.com/memory-allocator-showdown/MemoryAllocator.jpg">
+
+  
+
+
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    // set the default consent state on page load
+    if (localStorage.getItem("consentMode") === null) {
+        gtag("consent", "default", {
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied",
+            analytics_storage: "denied",
+            personalization_storage: "denied",
+            functionality_storage: "denied",
+            security_storage: "denied"
+        });
+    } else {
+        gtag("consent", "default", JSON.parse(localStorage.getItem("consentMode")));
+    }
+</script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SGY4B2FDND"></script>
+<script>
+    gtag('js', new Date());
+    gtag('config', 'G-SGY4B2FDND');
+</script>
+
+</head>
+
+
+<body>
+  <header>
+  <div class="logo-wrapper">
+    <a href="/" class="logo noline">
+      <img  src="/static/img/header.png" alt="Jane Street Blog logo">
+    </a>
+  </div>
+  <div class="main-menu">
+  <div class="container content">
+    <div class="wrapper">
+      <div class="left-container">
+        <a id="hamburger" href='#menu' class="toggle-link noline">
+          <i class="fa fa-navicon"></i>
+        </a>
+        <nav id="menu">
+          <a class="toggle-link noline"><i class="fa fa-close fa-lg"></i></a>
+          <ul class="links">
+            <li class="text-link">
+              <a href='/'>Home</a>
+            </li>
+            <li class="text-link">
+              <a href="/archive">All Posts</a>
+            </li>
+            <li class="text-link">
+              <a href="/machine-learning">Machine Learning</a>
+            </li>
+            <li class="text-link">
+              <a href="/authors">Authors Index</a>
+            </li>
+            <li class="text-link">
+              <a href="http://www.janestreet.com">Jane Street</a>
+            </li>
+            <li class="text-link mobile email-updates">
+              <a href="#">Subscribe to email updates</a>
+              <div id="mc-signup">
+  <form action="//janestreet.us10.list-manage.com/subscribe/post?u=c4f6c23879b87e463fac38cd1&amp;id=7baebe4e72&amp;f_id=00c4d1e5f0" method="post" name="mc-subscribe-form" target="_blank" novalidate>
+	    <label for="mc-email"><h3 class="title">Subscribe to Email Updates</h3></label>
+	    <input type="email" value="" name="EMAIL" id="mc-email" placeholder="Email Address" required>
+      <div class="hidden-input" aria-hidden="true"><input type="text" name="b_c4f6c23879b87e463fac38cd1_7baebe4e72" tabindex="-1" value=""></div>
+      <input type="submit" value="Subscribe" name="subscribe" id="mc-subscribe">
+  </form>
+</div> 
+            </li>
+            <li class="text-link mobile top-posts">
+              <a href="#">Featured Reads</a>
+              <span>
+                <ul>
+  <li>
+    <article>
+      <a href="/using-ascii-waveforms-to-test-hardware-designs/">
+        <span class="img-wrap featured-img centered">
+          <img src="/using-ascii-waveforms-to-test-hardware-designs/scientist_testing.jpg">
+          <div class="image-overlay">
+            <div class="flexbox">
+              <div class="text-overlay">
+                <hr class="separator">
+                <span class="read-more">Read more</span>
+                <hr class="separator">
+              </div>
+            </div>
+          </div>
+        </span>
+        <p>Using ASCII waveforms to test hardware designs</p>
+      </a>
+    </article>
+  </li>
+  <li>
+    <article>
+      <a href="/finding-memory-leaks-with-memtrace/">
+        <span class="img-wrap featured-img centered">
+          <img src="/finding-memory-leaks-with-memtrace/memory-leak.jpg">
+          <div class="image-overlay">
+            <div class="flexbox">
+              <div class="text-overlay">
+                <hr class="separator">
+                <span class="read-more">Read more</span>
+                <hr class="separator">
+              </div>
+            </div>
+          </div>
+        </span>
+        <p>Finding memory leaks with Memtrace</p>
+      </a>
+    </article>
+  </li>
+</ul>
+
+              </span>
+            </li>
+            <li class="text-link mobile tags">
+              <a href="#">Tags</a>
+              <span>
+                <ul class="tag-list">
+  
+  
+    
+      <li><a href="/tag/async">async</a></li>
+    
+      <li><a href="/tag/book">book</a></li>
+    
+      <li><a href="/tag/c">c</a></li>
+    
+      <li><a href="/tag/camlp4">camlp4</a></li>
+    
+      <li><a href="/tag/code-review">code-review</a></li>
+    
+      <li><a href="/tag/comments">comments</a></li>
+    
+      <li><a href="/tag/compiler">compiler</a></li>
+    
+      <li><a href="/tag/core">core</a></li>
+    
+      <li><a href="/tag/hackerschool">hackerschool</a></li>
+    
+      <li><a href="/tag/hg">hg</a></li>
+    
+      <li><a href="/tag/incremental">incremental</a></li>
+    
+      <li><a href="/tag/internship">internship</a></li>
+    
+      <li><a href="/tag/interviewing">interviewing</a></li>
+    
+      <li><a href="/tag/machine-learning">machine-learning</a></li>
+    
+      <li><a href="/tag/ocaml">ocaml</a></li>
+    
+      <li><a href="/tag/parallel-programming">parallel-programming</a></li>
+    
+      <li><a href="/tag/performance">performance</a></li>
+    
+      <li><a href="/tag/ppx">ppx</a></li>
+    
+      <li><a href="/tag/real-world-ocaml">real-world-ocaml</a></li>
+    
+      <li><a href="/tag/registers">registers</a></li>
+    
+      <li><a href="/tag/speed">speed</a></li>
+    
+      <li><a href="/tag/ui">ui</a></li>
+    
+  
+  
+</ul>
+
+              </span>
+            </li>
+            <li class="text-link mobile">
+              <a target="_blank" href="/feed.xml">Get the RSS feed</a>
+            </li>
+            <li class="text-link mobile">
+              <a target="_blank" href="https://opensource.janestreet.com/">Jane Street Open Source</a>
+            </li>
+            <li class="text-link mobile">
+              <a target="_blank" rel="noopener" href="https://www.janestreet.com/technology/">Join Our Team</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div class="stickyLogo">
+        <a href="/" class="logo noline"><img id="logo"  src="/static/img/header.png" alt="Jane Street logo"></a>
+      </div>
+      <div class="right-container">
+        <form role="search" class="search" method="get" action="/search.html">
+          <input class="navbar-search" type="search" placeholder="Type to search"/>
+        </form>
+        <a id="search-icon" href="#search">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</header>
+
+  <div class="main container">
+    <div class="content">
+      <div class="content-container">
+    <article>
+        <div class="post-header">
+            <div class="post-title">
+                <h3>Memory allocator showdown</h3>
+                
+            </div>
+            <span class="date">Sep 15, 2020 | </span>
+            <span class="reading-time" title="Estimated read time">
+                
+
+<span class="reading-time" title="Estimated read time">
+
+  7 min read
+
+</span>
+
+            </span>
+            <ul class="social-share">
+  <li>
+    <a href="https://www.facebook.com/sharer.php?u=https://blog.janestreet.com/memory-allocator-showdown/" title="Share on Facebook" target="_blank" rel="noopener">
+      <i class="fa fa-facebook-square fa-2x" aria-hidden="true"></i>
+      <span class="sr-only">Share on Facebook</span>
+    </a>
+  </li>
+  <li>
+    <a href="https://twitter.com/intent/tweet?source=https://blog.janestreet.com/memory-allocator-showdown/&text=Jane Street Blog - Memory allocator showdown https://blog.janestreet.com/memory-allocator-showdown/" target="_blank" rel="noopener" title="Tweet">
+      <i class="fa fa-twitter-square fa-2x" aria-hidden="true"></i>
+      <span class="sr-only">Share on Twitter</span>
+    </a>
+  </li>
+  <li>
+    <a href="http://www.linkedin.com/shareArticle?mini=true&url=https://blog.janestreet.com/memory-allocator-showdown/&title=Jane Street Blog - Memory allocator showdown&summary=(Image by Theresa Bloise) Since version 4.10, OCaml offers a new best-fit memory allocator alongside its existing default, the next-fit allocator. At Jane Street, we’ve seen a big improvement after switching over to the new allocator. This post isn’t about how the new allocator works. For that, the best source...&source=https://blog.janestreet.com/memory-allocator-showdown/" target="_blank" rel="noopener" title="Share on LinkedIn">
+      <i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i>
+      <span class="sr-only">Share on LinkedIn</span>
+    </a>
+  </li>
+</ul>
+
+            
+            <div class="featimg-wrapper">
+                <img class="featimg" src="/memory-allocator-showdown/MemoryAllocator.jpg" alt="MemoryAllocator.jpg">
+            </div>
+            
+            
+            
+            
+            
+            
+
+
+  
+  
+    
+    <div class="author img">
+      
+        <div class="author-avatar">
+          <a href="/author/sdolan"><img src="/static/img/avatars//sdolan.jpg" alt="sdolan avatar"/></a>
+        </div>
+      
+      
+      <div class="name">By: <a href="/author/sdolan">Stephen Dolan</a></div>
+    </div>
+  
+
+
+            
+            
+            
+
+        </div>
+        <div class="post-content">
+            <p><em>(Image by Theresa Bloise)</em></p>
+
+<p>Since version 4.10, OCaml offers a new <em>best-fit</em> memory allocator
+alongside its existing default, the <em>next-fit</em> allocator. At Jane
+Street, we’ve seen a big improvement after switching over to the new
+allocator.</p>
+
+<p>This post isn’t about how the new allocator works. For that, the best
+source is <a href="http://gallium.inria.fr/~scherer/doc/chameau-sur-le-plateau/2019-10-08-damien-doligez-talk-notes.txt">these notes from a talk by its
+author</a>.</p>
+
+<p>Instead, this post is about just how tricky it is to compare two
+allocators in a reasonable way, especially for a garbage-collected
+system.</p>
+
+<h2 id="benchmarks">Benchmarks</h2>
+
+<p>One of the benchmarks we looked at actually slowed down when we switched
+allocator, going from this (next-fit):</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>$ time ./bench.exe 50000
+real    0m34.282s
+</code></pre>
+</div>
+
+<p>to this (best-fit):</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>$ time ./bench.exe 50000
+real    0m36.115s
+</code></pre>
+</div>
+
+<p>But that’s not the whole story. The best-fit memory allocator reduces
+fragmentation, packing allocations together more tightly. If we
+measure both time spent and memory used, we see there’s a trade-off
+here, with best-fit running slightly slower but using less memory:</p>
+
+<p><a href="/memory-allocator-showdown/onepoint.png"><img src="/memory-allocator-showdown/onepoint.png" alt="single datapoints of time and space usage" /></a></p>
+
+<p>But that’s not the whole story either. It would be, in a language with
+manual memory management, where the allocator has to deal with a
+sequence of <code class="highlighter-rouge">malloc</code> and <code class="highlighter-rouge">free</code> calls determined by the program.  On
+the other hand, in a language with garbage collection, the GC gets to
+choose when memory is freed. By collecting more slowly, we free later,
+using more memory and less time. Adjusting the GC rate trades space
+and time.</p>
+
+<p>So, in a GC’d language the performance of a program is not described
+by a single (space, time) pair, but by a curve of (space, time) pairs
+describing the available tradeoff. The way to make this tradeoff in
+OCaml is to adjust the <code class="highlighter-rouge">space_overhead</code> parameter from its default
+of 80. We ran the same benchmark with <code class="highlighter-rouge">space_overhead</code> varying from 20
+to 320 (that is, from 1/4 to 4x its default value), giving us a more
+complete space/time curve for this benchmark. The benchmark is
+relatively noisy, but we can still see a separation between best-fit
+and next-fit:</p>
+
+<p><img src="./curve.png" alt="whole curves of time and space usage" /></p>
+
+<p>Here, best-fit handily beats next fit, whether optimising for time or
+space. Note that for every blue point there is an orange point below
+and left of it, likely with a different <code class="highlighter-rouge">space_overhead</code> value. (Also
+note that these numbers come from one of the benchmarks that best-fit
+performed the worst on.)</p>
+
+<p>In the default configuration, best-fit picks a point on the curve
+that’s a bit further to the right than next-fit: it’s optimising more
+aggressively for space use than time spent. In hindsight, this is to
+be expected: internally, the <code class="highlighter-rouge">space_overhead</code> measure does not take
+into account fragmentation, so for a given <code class="highlighter-rouge">space_overhead</code> value
+best-fit will use less space than next-fit, as it fragments less.</p>
+
+<p>That’s <em>almost</em> the whole story. There are just two questions left:
+what exactly do mean mean by “memory use” and where did the curves
+come from?</p>
+
+<h2 id="measuring-memory-use">Measuring memory use</h2>
+
+<p>The y axis above is marked “memory use”. There are suprisingly many
+ways to measure memory use, and picking the wrong one can be
+misleading. The most obvious candidate is OCaml’s <code class="highlighter-rouge">top_heap_size</code>,
+available from <code class="highlighter-rouge">Gc.stat</code>. This can mislead for two
+reasons:</p>
+
+<ul>
+  <li>
+    <p>It’s quantized: OCaml grows the heap in large chunks, so a minor
+improvement in memory use (e.g. 5-10%) often won’t affect
+<code class="highlighter-rouge">top_heap_size</code> at all.</p>
+  </li>
+  <li>
+    <p>It’s an overestimate: Often, not all of the
+heap is used. The degree to which this occurs depends on the
+allocator.</p>
+  </li>
+</ul>
+
+<p>Instead, the memory axis above shows Linux’s measurements of RSS (this
+is printed by <code class="highlighter-rouge">/usr/bin/time</code>, and is one of the columns in <code class="highlighter-rouge">top</code>). RSS is
+“resident set size”, the amount of actual physical RAM in use by the
+program. This is generally less than the amount allocated: Linux waits
+until memory is used before allocating RAM to it, so that the RAM can
+be used more usefully (e.g. as disk cache) in the meantime. (This
+behaviour is not the same thing as VM overcommit: Linux allocates RAM
+lazily regardless of the overcommit setting. If overcommit is disabled, it
+will only allow allocations if there’s enough RAM+swap to handle all
+of them being used simultaneously, but even in this case it will
+populate them lazily, preferring to use RAM as cache in the
+meantime).</p>
+
+<p>The relationship between <code class="highlighter-rouge">top_heap_size</code> and RSS differs between allocators:</p>
+
+<p><img src="./heapsize.png" alt="allocator rss usage comparison" /></p>
+
+<p>This graph shows the same benchmark run with different iteration
+counts. Each datapoint is a separate run of the program, whose memory
+use is larger with larger iteration counts. The RSS lines are shifted
+vertically to align at the left: without this change, the RSS lines
+are larger than the heap size because they also include binary
+size. The shifted RSS lines slightly exceed top heap size at the right
+of the graph, since not quite all of the memory allocated is heap
+(this happens on both but is more obvious on next-fit).</p>
+
+<p>Notice that the next-fit allocator often uses all of the memory it
+allocates: when this allocator finds the large empty block at the end
+of the heap, it latches on and allocates from it until it’s empty and
+the entire allocated heap has been used. Best-fit, by contrast,
+manages to fit new allocations into holes in the heap, and only draws
+from the large empty block when it needs to. This means that the
+memory use is lower: even when the heap expands, best-fit does not
+cause more RAM to be used until it’s needed. In other words, there is
+an additional space improvement of switching to best-fit that does not
+show up in measurements of <code class="highlighter-rouge">top_heap_size</code>, which is why the first graph
+above plots memory as measured by RSS.</p>
+
+<h2 id="modelling-the-major-gc">Modelling the major GC</h2>
+
+<p>The curves in the first graph above are derived by fitting a
+three-parameter model to the runtime and space usage data
+points. Here’s how that model is derived, and roughly what the
+parameters mean.</p>
+
+<p>The time taken by major collection, under the standard but
+not-particularly-reasonable assumption that all cycles are the same,
+is <code class="highlighter-rouge">(mark_time + sweep_time) * #cycles</code>. Mark time is proportional to
+the size of live heap (a property of the program itself, independent
+of GC settings like <code class="highlighter-rouge">space_overhead</code>), and sweep time is proportional
+to the size of the live heap + <code class="highlighter-rouge">G</code>, the amount of garbage collected
+per cycle. This amount <code class="highlighter-rouge">G</code> is roughly the amount allocated, so the
+number of cycles is roughly the total allocations (another property of
+the program itself) divided by <code class="highlighter-rouge">G</code>.</p>
+
+<p>The result is that the total runtime is roughly some affine linear
+function of <code class="highlighter-rouge">(1/G)</code>, and the total heap size is roughly <code class="highlighter-rouge">G</code> plus a
+constant. That means that heap size is a function of runtime as
+follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>H = 1/(t-a) * b + c
+</code></pre>
+</div>
+
+<p>for three constants <code class="highlighter-rouge">a</code>, <code class="highlighter-rouge">b</code>, <code class="highlighter-rouge">c</code>. Fitting this 3-parameter model
+gives the curves in the original graph.</p>
+
+<p>The parameters <code class="highlighter-rouge">a</code>, <code class="highlighter-rouge">b</code> and <code class="highlighter-rouge">c</code> have straightforward
+interpretations. <code class="highlighter-rouge">a</code> is the vertical asymptote, which is the minimum
+amount of time the program can take if it does no collection at
+all. This consists of the program code plus the allocator, so best-fit
+improves <code class="highlighter-rouge">a</code> by being faster to allocate. <code class="highlighter-rouge">c</code> is the horizontal
+asymptote, the minimum amount of space the program can use if it
+collects continuously. This consists of the live data plus any space
+lost to fragmentation, so best-fit improves <code class="highlighter-rouge">c</code> by fragmenting
+less. Finally, <code class="highlighter-rouge">b</code> determines the shape of the curve between the two
+asymptotes. This is broadly similar between the two allocators, since
+changing the allocator doesn’t strongly affect how fast marking and
+sweeping can be done (although stay tuned here, as there’s some
+work in progress on speeding up marking and sweeping with
+prefetching).</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Switching allocators from next-fit to best-fit has made most programs
+faster and smaller, but it’s surprising how much work it took to be
+able to say that confidently!</p>
+
+        </div>
+        <div class="bios-container">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <p class="bio">Stephen joined Jane Street in 2019, where he mainly works on the
+OCaml compiler and runtime. Previously, he worked at OCaml Labs
+and got his PhD from the University of Cambridge.
+</p>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        </div>
+        
+        <p class="tag-label">
+
+  <div class="tags">
+    
+  </div>
+
+</p>
+        
+    </article>
+    <div class="post-nav">
+  
+    <a class="btn prev" href="/announcing-signals-and-threads-index/"><i class="fa fa-angle-left"></i><span class="short"> prev</span><span class="long">ious post</span></a>
+  
+  
+    <a class="btn next" href="/finding-memory-leaks-with-memtrace/"><span class="short">next </span><span class="long">post </span><i class="fa fa-angle-right"></i></a>
+  
+</div>
+
+</div>
+
+    </div>
+    <div class="sidebar">
+  <div class="widget email-signup">
+    <div id="mc-signup">
+  <form action="//janestreet.us10.list-manage.com/subscribe/post?u=c4f6c23879b87e463fac38cd1&amp;id=7baebe4e72&amp;f_id=00c4d1e5f0" method="post" name="mc-subscribe-form" target="_blank" novalidate>
+	    <label for="mc-email"><h3 class="title">Subscribe to Email Updates</h3></label>
+	    <input type="email" value="" name="EMAIL" id="mc-email" placeholder="Email Address" required>
+      <div class="hidden-input" aria-hidden="true"><input type="text" name="b_c4f6c23879b87e463fac38cd1_7baebe4e72" tabindex="-1" value=""></div>
+      <input type="submit" value="Subscribe" name="subscribe" id="mc-subscribe">
+  </form>
+</div> 
+  </div>
+
+  <div class="widget">
+    <h3 class="title">Signals & Threads Podcast</h3>
+    <div class="input-wrap">
+      <a target="_blank" href="https://signalsandthreads.com">
+         <img src="/static/img/signals-and-threads-promo.png" style="border: solid 1px #e6e5e5"/>
+      </a>
+      <a target="_blank" href="https://signalsandthreads.com/why-testing-is-hard-and-how-to-fix-it/">
+        <div style="height:35px; margin-top:20px; border: 1px solid #e6e5e5; background:#EDEFF2; text-align:center;">
+          <p style="margin-top:4px">Listen to the latest episode</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="widget">
+    <h3 class="title">Featured Tech Talk</h3>
+    <div class="input-wrap">
+      <a target="_blank" href="https://www.youtube.com/watch?v=Rt3XyeFHvt4">
+         <p style="font-size:14px; line-height:1.4;">The Algorithm for Precision Medicine</p>
+         <img src="/static/img/youtube.png"/>
+      </a>
+      <a target="_blank" href="https://www.youtube.com/channel/UCDsVC_ewpcEW_AQcO-H-RDQ/videos">
+        <div style="height:35px; margin-top:20px; border: 1px solid #e6e5e5; background:#EDEFF2; text-align:center;">
+          <p style="margin-top:4px">Jane Street YouTube Channel</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="widget top-posts">
+    <h3 class="title">Featured Reads</h3>
+    <ul>
+  <li>
+    <article>
+      <a href="/using-ascii-waveforms-to-test-hardware-designs/">
+        <span class="img-wrap featured-img centered">
+          <img src="/using-ascii-waveforms-to-test-hardware-designs/scientist_testing.jpg">
+          <div class="image-overlay">
+            <div class="flexbox">
+              <div class="text-overlay">
+                <hr class="separator">
+                <span class="read-more">Read more</span>
+                <hr class="separator">
+              </div>
+            </div>
+          </div>
+        </span>
+        <p>Using ASCII waveforms to test hardware designs</p>
+      </a>
+    </article>
+  </li>
+  <li>
+    <article>
+      <a href="/finding-memory-leaks-with-memtrace/">
+        <span class="img-wrap featured-img centered">
+          <img src="/finding-memory-leaks-with-memtrace/memory-leak.jpg">
+          <div class="image-overlay">
+            <div class="flexbox">
+              <div class="text-overlay">
+                <hr class="separator">
+                <span class="read-more">Read more</span>
+                <hr class="separator">
+              </div>
+            </div>
+          </div>
+        </span>
+        <p>Finding memory leaks with Memtrace</p>
+      </a>
+    </article>
+  </li>
+</ul>
+
+  </div>
+
+  <div class="widget tags-list">
+    <h3 class="title">Tags</h3>
+    <ul class="tag-list">
+  
+  
+    
+      <li><a href="/tag/async">async</a></li>
+    
+      <li><a href="/tag/book">book</a></li>
+    
+      <li><a href="/tag/c">c</a></li>
+    
+      <li><a href="/tag/camlp4">camlp4</a></li>
+    
+      <li><a href="/tag/code-review">code-review</a></li>
+    
+      <li><a href="/tag/comments">comments</a></li>
+    
+      <li><a href="/tag/compiler">compiler</a></li>
+    
+      <li><a href="/tag/core">core</a></li>
+    
+      <li><a href="/tag/hackerschool">hackerschool</a></li>
+    
+      <li><a href="/tag/hg">hg</a></li>
+    
+      <li><a href="/tag/incremental">incremental</a></li>
+    
+      <li><a href="/tag/internship">internship</a></li>
+    
+      <li><a href="/tag/interviewing">interviewing</a></li>
+    
+      <li><a href="/tag/machine-learning">machine-learning</a></li>
+    
+      <li><a href="/tag/ocaml">ocaml</a></li>
+    
+      <li><a href="/tag/parallel-programming">parallel-programming</a></li>
+    
+      <li><a href="/tag/performance">performance</a></li>
+    
+      <li><a href="/tag/ppx">ppx</a></li>
+    
+      <li><a href="/tag/real-world-ocaml">real-world-ocaml</a></li>
+    
+      <li><a href="/tag/registers">registers</a></li>
+    
+      <li><a href="/tag/speed">speed</a></li>
+    
+      <li><a href="/tag/ui">ui</a></li>
+    
+  
+  
+</ul>
+
+  </div>
+
+  <div class="widget">
+    <h3 class="title">RSS</h3>
+    <div class="input-wrap">
+      <a target="_blank" href="/feed.xml">Get the RSS feed</a>
+    </div>
+  </div>
+
+  <div class="widget">
+    <h3 class="title">Jane Street Open Source</h3>
+    <div class="input-wrap">
+      <a target="_blank" href="https://opensource.janestreet.com/">From committing patches to the Linux kernel to releasing our own projects, we’re always looking for ways to participate in the open source community.</a>
+    </div>
+  </div>
+
+  <div class="widget">
+    <h3 class="title">Join Our Team</h3>
+    <div class="sidebar-callout">
+  <a target="_blank" rel="noopener" href="https://www.janestreet.com/technology/">
+    <img class="logo" src="/static/img/janestreet_logo.jpg" alt="Jane Street" />
+    <div class="slogan">Where FP meets the real world.</div>
+    <p>If you're interested in working at a place where functional programming meets the real world, then apply for a job at Jane Street.</p>
+    <p>Learn more</p>
+  </a>
+</div>
+
+  </div>
+</div>
+
+  </div>
+  <footer>
+  <div class="container">
+    <div class="content">
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/who-we-are/">Who We Are</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/what-we-do/overview/">What We Do</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/what-we-do/client-offering/">Client Offering</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/the-latest/">The Latest</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/culture/overview/">Culture</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/join-jane-street/overview/">Join Jane Street</a></li>
+            
+          </ul>
+        
+        
+      
+        
+          <ul>
+            
+              <li><a  href="https://www.janestreet.com/contact-us/">Contact Us</a></li>
+            
+          </ul>
+        
+        
+      
+        
+        
+          <div class="legal">
+            <div class="disclosures-policies"><a href="https://www.janestreet.com/disclosures-and-policies/">Disclosures & Policies</a></div>
+            <p class="copyright">
+              &copy; Copyright 2015-2026 Jane Street Group, LLC. All rights reserved. Services are provided in the U.S. by Jane Street Capital, LLC and Jane Street Execution Services, LLC, each of which is a SEC-registered broker dealer and member of FINRA (<a href="https://www.finra.org/">www.finra.org</a>). Regulated activities are undertaken in Europe by Jane Street Financial Limited, an investment firm authorized and regulated by the U.K. Financial Conduct Authority, and Jane Street Netherlands B.V., an investment firm authorized and regulated by the Netherlands Authority for the Financial Markets (<i>Autoriteit Financiële Markten</i>), and in Hong Kong by Jane Street Hong Kong Limited, a regulated entity under the Hong Kong Securities and Futures Commission (CE No. BAL548). Each of these entities is a wholly owned subsidiary of Jane Street Group, LLC. This material is provided for informational purposes only and does not constitute an offer or solicitation for the purchase or sale of any security or other financial instrument. | Jane Street and the concentric circle mark are registered trademarks of Jane Street.
+            </p>
+            <span class="policy-links">
+              
+                <a target="_blank" rel="noopener" href="https://www.janestreet.com/privacy-notice/">Privacy</a>
+              
+                <a target="_blank" rel="noopener" href="https://www.janestreet.com/ad-cookie-policy/">Cookies</a>
+              
+            </span>
+          </div>
+        
+      
+    </div>
+  </div>
+</footer>
+<script src="/static/js/main.js"></script>
+
+  <div class="backtotop">
+    <i class="fa fa-chevron-up" aria-hidden="true"></i>
+  </div>
+  <!-- cookie consent banner -->
+<div id="cookie-consent-banner" class="cc-window cc-banner cc-type-info cc-theme-block cc-bottom">
+  <span class="cc-message">
+    Jane Street Group, LLC uses cookies and similar technologies, including third-party cookies, on this Site to provide basic functionalities and perform analytics. You may accept or decline cookies by selecting “Accept” or “Reject”. For information regarding our cookie practices, see Jane Street’s
+    <a rel="noopener noreferrer nofollow" class="cc-link" href="https://www.janestreet.com/ad-cookie-policy"
+      target="_blank">Ad and Cookie Policy</a>.
+  </span>
+  <div class="cc-compliance">
+    <a id="btn-accept-all" class="cc-btn cc-dismiss cookie-consent-button">Accept All</a>
+    <a id="btn-reject-all" class="cc-btn cc-deny cookie-consent-button">Reject All</a>
+  </div>
+</div>
+
+<!-- handle consent updates -->
+<script>
+  function hideBanner() {
+    document.getElementById("cookie-consent-banner").style.display = "none";
+  }
+
+  if (localStorage.getItem("consentMode") === null) {
+    document
+      .getElementById("btn-accept-all")
+      .addEventListener("click", function () {
+        setConsent({
+          necessary: true,
+          analytics: true,
+          preferences: true,
+          marketing: true,
+        });
+        hideBanner();
+      });
+    document
+      .getElementById("btn-reject-all")
+      .addEventListener("click", function () {
+        setConsent({
+          necessary: false,
+          analytics: false,
+          preferences: false,
+          marketing: false,
+        });
+        hideBanner();
+      });
+    document.getElementById("cookie-consent-banner").style.display = "block";
+  } else {
+    hideBanner();
+  }
+
+  function setConsent(consent) {
+    const consentMode = {
+      ad_storage: consent.marketing ? "granted" : "denied",
+      ad_user_data: consent.marketing ? "granted" : "denied",
+      ad_personalization: consent.marketing ? "granted" : "denied",
+      analytics_storage: consent.analytics ? "granted" : "denied",
+      personalization_storage: consent.preferences ? "granted" : "denied",
+      functionality_storage: consent.necessary ? "granted" : "denied",
+      security_storage: consent.necessary ? "granted" : "denied"
+    };
+    gtag("consent", "update", consent);
+    localStorage.setItem("consentMode", JSON.stringify(consentMode));
+  }
+</script>
+
+</body>
+
+</html>

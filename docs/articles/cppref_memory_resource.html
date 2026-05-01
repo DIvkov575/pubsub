@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="client-nojs" lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<title>std::pmr::memory_resource - cppreference.com</title>
+<script>document.documentElement.className="client-js";RLCONF={"wgBreakFrames":false,"wgSeparatorTransformTable":["",""],"wgDigitTransformTable":["",""],"wgDefaultDateFormat":"dmy","wgMonthNames":["","January","February","March","April","May","June","July","August","September","October","November","December"],"wgRequestId":"ff34d1e8e60333ad1277249e","wgCanonicalNamespace":"","wgCanonicalSpecialPageName":false,"wgNamespaceNumber":0,"wgPageName":"cpp/memory/memory_resource","wgTitle":"cpp/memory/memory resource","wgCurRevisionId":155180,"wgRevisionId":155180,"wgArticleId":14898,"wgIsArticle":true,"wgIsRedirect":false,"wgAction":"view","wgUserName":null,"wgUserGroups":["*"],"wgCategories":[],"wgPageViewLanguage":"en","wgPageContentLanguage":"en","wgPageContentModel":"wikitext","wgRelevantPageName":"cpp/memory/memory_resource","wgRelevantArticleId":14898,"wgIsProbablyEditable":false,"wgRelevantPageIsProbablyEditable":false,"wgRestrictionEdit":[],"wgRestrictionMove":[],"wgCiteReferencePreviewsActive":true,"wgCheckUserClientHintsHeadersJsApi":["architecture","bitness","brands","fullVersionList","mobile","model","platform","platformVersion"]};
+RLSTATE={"site.styles":"ready","user.styles":"ready","user":"ready","user.options":"loading","ext.pygments":"ready","skins.cppreference2.styles":"ready"};RLPAGEMODULES=["ext.pygments.view","site","mediawiki.page.ready","mediawiki.toc","skins.cppreference2.js","ext.checkUser.clientHints","ext.gadget.ColiruCompiler","ext.gadget.StandardRevisions","ext.gadget.MathJax"];</script>
+<script>(RLQ=window.RLQ||[]).push(function(){mw.loader.impl(function(){return["user.options@12s5i",function($,jQuery,require,module){mw.user.tokens.set({"patrolToken":"+\\","watchToken":"+\\","csrfToken":"+\\"});
+}];});});</script>
+<link rel="stylesheet" href="/load.php?lang=en&amp;modules=ext.pygments%7Cskins.cppreference2.styles&amp;only=styles&amp;skin=cppreference2">
+<script async="" src="/load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;raw=1&amp;skin=cppreference2"></script>
+<meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=cppreference2">
+<meta name="generator" content="MediaWiki 1.43.8">
+<meta name="robots" content="max-image-preview:standard">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1120">
+<link rel="search" type="application/opensearchdescription+xml" href="/rest.php/v1/search" title="cppreference.com (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://cppreference.com/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="cppreference.com Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject page-cpp_memory_memory_resource rootpage-cpp skin-cppreference2 action-view cpp-navbar"><!-- header -->
+<div id="mw-head" class="noprint">
+    <div id="cpp-head-first-base">
+        <div id="cpp-head-first">
+            <h5><a href="/">cppreference.com</a></h5>
+            <div id="cpp-head-search">
+                <div id="p-search">
+                    <h5>Search</h5>
+                    <form action="/index.php" id="searchform">
+                        <div id="simpleSearch">
+                            <input type="search" name="search" placeholder="Search cppreference.com" aria-label="Search cppreference.com" autocapitalize="none" title="Search cppreference.com [f]" accesskey="f" id="searchInput">                            <input type="hidden" name="title" value="Special:Search">
+                            <button id="searchButton" type="submit" name="go" title="Search">&#x1F50D;</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="cpp-head-personal">
+                <div id="p-personal" class="">
+<span id="pt-createaccount"><a href="/index.php?title=Special:CreateAccount&amp;returnto=cpp%2Fmemory%2Fmemory+resource" title="You are encouraged to create an account and log in; however, it is not mandatory"><span>Create account</span></a></span>                    <div class="menu">
+                        <ul lang="en" dir="ltr">
+<li id="pt-login" class="mw-list-item"><a href="/index.php?title=Special:UserLogin&amp;returnto=cpp%2Fmemory%2Fmemory+resource" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o"><span>Log in</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cpp-head-second-base">
+        <div id="cpp-head-second">
+            <div id="cpp-head-tools-left">
+                <!-- namespaces -->
+                <div id="p-namespaces" class="vectorTabs"><h5>Namespaces</h5><ul lang="en" dir="ltr"><li id="ca-nstab-main" class="selected mw-list-item"><a href="/cpp/memory/memory_resource" title="View the content page [c]" accesskey="c"><span>Page</span></a></li>
+<li id="ca-talk" class="new mw-list-item"><a href="/index.php?title=Talk:cpp/memory/memory_resource&amp;action=edit&amp;redlink=1" rel="discussion" class="new" title="Discussion about the content page (page does not exist) [t]" accesskey="t"><span>Discussion</span></a></li>
+</ul></div>                <!-- variants -->
+                <div id="p-variants" class="vectorMenu emptyPortlet"><h5><span>Variants</span><a href="#"></a></h5><div class="menu"><ul lang="en" dir="ltr"></ul></div></div>            </div>
+            <div id="cpp-head-tools-right">
+                <!-- views -->
+                <div id="p-views" class="vectorTabs"><h5>Views</h5><ul lang="en" dir="ltr"><li id="ca-view" class="selected mw-list-item"><a href="/cpp/memory/memory_resource"><span>Read</span></a></li>
+<li id="ca-viewsource" class="mw-list-item"><a href="/index.php?title=cpp/memory/memory_resource&amp;action=edit" title="This page is protected.&#10;You can view its source [e]" accesskey="e"><span>View source</span></a></li>
+<li id="ca-history" class="mw-list-item"><a href="/index.php?title=cpp/memory/memory_resource&amp;action=history" title="Past revisions of this page [h]" accesskey="h"><span>View history</span></a></li>
+</ul></div>                <!-- actions -->
+                <div id="p-cactions" class="vectorMenu emptyPortlet"><h5><span>Actions</span><a href="#"></a></h5><div class="menu"><ul lang="en" dir="ltr"></ul></div></div>            </div>
+        </div>
+    </div>
+</div>
+<!-- /header -->
+
+<!-- content -->
+<div id="cpp-content-base">
+    <div id="content" class="mw-body">
+        <a id="top"></a>
+        <div id="mw-js-message" style="display:none;" lang="en" dir="ltr"></div>
+        <!-- firstHeading -->
+        <h1 id="firstHeading" class="firstHeading"><span style="font-size:0.7em; line-height:130%">std::pmr::</span>memory_resource</h1>
+        <!-- /firstHeading -->
+        <!-- bodyContent -->
+        <div id="bodyContent" class="mw-body-content">
+            <!-- tagline -->
+            <div id="siteSub">From cppreference.com</div>
+            <!-- /tagline -->
+            <!-- subtitle -->
+            <div id="contentSub" lang="en" dir="ltr"><div id="mw-content-subtitle"><div class="subpages">&lt; <bdi dir="ltr"><a href="/cpp" title="cpp">cpp</a></bdi> | <bdi dir="ltr"><a href="/cpp/memory" title="cpp/memory">memory</a></bdi></div></div></div>
+            <!-- /subtitle -->
+            <!-- bodycontent -->
+            <div id="mw-content-text"><div class="mw-content-ltr mw-parser-output" lang="en" dir="ltr"><div class="t-navbar" style=""><div class="t-navbar-sep">&#160;</div><div class="t-navbar-head"><a href="/cpp" title="cpp">C++</a><div class="t-navbar-menu"><div><div><table class="t-nv-begin" cellpadding="0" style="line-height:1.1em;">
+<tbody><tr class="t-nv"><td colspan="5"><a href="/cpp/compiler_support" title="cpp/compiler support">Compiler support</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/freestanding" title="cpp/freestanding">Freestanding and hosted</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/language" title="cpp/language">Language</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/standard_library" title="cpp/standard library">Standard library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/header" title="cpp/header">Standard library headers</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/named_req" title="cpp/named req">Named requirements</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/feature_test" title="cpp/feature test">Feature test macros</a> <span class="t-mark-rev t-since-cxx20">(C++20)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/utility#Language_support" title="cpp/utility">Language support library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/concepts" title="cpp/concepts">Concepts library</a> <span class="t-mark-rev t-since-cxx20">(C++20)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/error" title="cpp/error">Diagnostics library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/memory" title="cpp/memory">Memory management library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/meta" title="cpp/meta">Metaprogramming library</a> <span class="t-mark-rev t-since-cxx11">(C++11)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/utility" title="cpp/utility">General utilities library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/container" title="cpp/container">Containers library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/iterator" title="cpp/iterator">Iterators library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/ranges" title="cpp/ranges">Ranges library</a> <span class="t-mark-rev t-since-cxx20">(C++20)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/algorithm" title="cpp/algorithm">Algorithms library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/string" title="cpp/string">Strings library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/text" title="cpp/text">Text processing library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/numeric" title="cpp/numeric">Numerics library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/chrono" title="cpp/chrono">Date and time library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/io" title="cpp/io">Input/output library</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/filesystem" title="cpp/filesystem">Filesystem library</a> <span class="t-mark-rev t-since-cxx17">(C++17)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/thread" title="cpp/thread">Concurrency support library</a> <span class="t-mark-rev t-since-cxx11">(C++11)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/execution" title="cpp/execution">Execution control library</a> <span class="t-mark-rev t-since-cxx26">(C++26)</span></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/experimental" title="cpp/experimental">Technical specifications</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/symbol_index" title="cpp/symbol index">Symbols index</a></td></tr>
+<tr class="t-nv"><td colspan="5"><a href="/cpp/links/libs" title="cpp/links/libs">External libraries</a></td></tr>
+</tbody></table></div><div><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/navbar_content&amp;action=edit">&#91;edit&#93;</a></span></div></div></div></div><div class="t-navbar-sep">&#160;</div><div class="t-navbar-head"><a href="/cpp/memory" title="cpp/memory">Memory management library</a><div class="t-navbar-menu"><div><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/voidify" title="cpp/memory/voidify"><span class="t-lines"><span><i>voidify</i></span></span></a></div><div><span class="t-lines"><span><span class="t-mark t-mark-expos">(<span title="This definition is for illustration purposes only. An implementation does not need to define an entity in this manner. The name of this entity is unspecified.">exposition only*</span>)</span></span></span></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Allocators" title="cpp/memory">Allocators</a></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/allocator" title="cpp/memory/allocator"><span class="t-lines"><span>allocator</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/allocator_traits" title="cpp/memory/allocator traits"><span class="t-lines"><span>allocator_traits</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/allocation_result" title="cpp/memory/allocation result"><span class="t-lines"><span>allocation_result</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx23">(C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/scoped_allocator_adaptor" title="cpp/memory/scoped allocator adaptor"><span class="t-lines"><span>scoped_allocator_adaptor</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/polymorphic_allocator" title="cpp/memory/polymorphic allocator"><span class="t-lines"><span>pmr::polymorphic_allocator</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/allocator_arg" title="cpp/memory/allocator arg"><span class="t-lines"><span>allocator_arg</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uses_allocator" title="cpp/memory/uses allocator"><span class="t-lines"><span>uses_allocator</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uses_allocator_construction_args" title="cpp/memory/uses allocator construction args"><span class="t-lines"><span>uses_allocator_construction_args</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/make_obj_using_allocator" title="cpp/memory/make obj using allocator"><span class="t-lines"><span>make_obj_using_allocator</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_construct_using_allocator" title="cpp/memory/uninitialized construct using allocator"><span class="t-lines"><span>uninitialized_construct_using_allocator</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Uninitialized_memory_algorithms" title="cpp/memory">Uninitialized memory algorithms</a></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_copy" title="cpp/memory/uninitialized copy"><span class="t-lines"><span>uninitialized_copy</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_fill" title="cpp/memory/uninitialized fill"><span class="t-lines"><span>uninitialized_fill</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_move" title="cpp/memory/uninitialized move"><span class="t-lines"><span>uninitialized_move</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_copy_n" title="cpp/memory/uninitialized copy n"><span class="t-lines"><span>uninitialized_copy_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_fill_n" title="cpp/memory/uninitialized fill n"><span class="t-lines"><span>uninitialized_fill_n</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_move_n" title="cpp/memory/uninitialized move n"><span class="t-lines"><span>uninitialized_move_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/construct_at" title="cpp/memory/construct at"><span class="t-lines"><span>construct_at</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_default_construct" title="cpp/memory/uninitialized default construct"><span class="t-lines"><span>uninitialized_default_construct</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_value_construct" title="cpp/memory/uninitialized value construct"><span class="t-lines"><span>uninitialized_value_construct</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/destroy" title="cpp/memory/destroy"><span class="t-lines"><span>destroy</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_default_construct_n" title="cpp/memory/uninitialized default construct n"><span class="t-lines"><span>uninitialized_default_construct_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/uninitialized_value_construct_n" title="cpp/memory/uninitialized value construct n"><span class="t-lines"><span>uninitialized_value_construct_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/destroy_n" title="cpp/memory/destroy n"><span class="t-lines"><span>destroy_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/destroy_at" title="cpp/memory/destroy at"><span class="t-lines"><span>destroy_at</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Constrained_uninitialized_memory_algorithms" title="cpp/memory">Constrained uninitialized memory algorithms</a></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_copy" title="cpp/memory/ranges/uninitialized copy"><span class="t-lines"><span>ranges::uninitialized_copy</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_fill" title="cpp/memory/ranges/uninitialized fill"><span class="t-lines"><span>ranges::uninitialized_fill</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_move" title="cpp/memory/ranges/uninitialized move"><span class="t-lines"><span>ranges::uninitialized_move</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_copy_n" title="cpp/memory/ranges/uninitialized copy n"><span class="t-lines"><span>ranges::uninitialized_copy_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span><code>&#160;</code></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_fill_n" title="cpp/memory/ranges/uninitialized fill n"><span class="t-lines"><span>ranges::uninitialized_fill_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_move_n" title="cpp/memory/ranges/uninitialized move n"><span class="t-lines"><span>ranges::uninitialized_move_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/construct_at" title="cpp/memory/ranges/construct at"><span class="t-lines"><span>ranges::construct_at</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_default_construct" title="cpp/memory/ranges/uninitialized default construct"><span class="t-lines"><span>ranges::uninitialized_default_construct</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_value_construct" title="cpp/memory/ranges/uninitialized value construct"><span class="t-lines"><span>ranges::uninitialized_value_construct</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/destroy" title="cpp/memory/ranges/destroy"><span class="t-lines"><span>ranges::destroy</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_default_construct_n" title="cpp/memory/ranges/uninitialized default construct n"><span class="t-lines"><span>ranges::uninitialized_default_construct_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span><code>&#160;</code></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/uninitialized_value_construct_n" title="cpp/memory/ranges/uninitialized value construct n"><span class="t-lines"><span>ranges::uninitialized_value_construct_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/destroy_n" title="cpp/memory/ranges/destroy n"><span class="t-lines"><span>ranges::destroy_n</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/ranges/destroy_at" title="cpp/memory/ranges/destroy at"><span class="t-lines"><span>ranges::destroy_at</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Memory_resources" title="cpp/memory">Memory resources</a></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a class="mw-selflink selflink"><span class="t-lines"><span>pmr::memory_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/get_default_resource" title="cpp/memory/get default resource"><span class="t-lines"><span>pmr::get_default_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/set_default_resource" title="cpp/memory/set default resource"><span class="t-lines"><span>pmr::set_default_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new_delete_resource" title="cpp/memory/new delete resource"><span class="t-lines"><span>pmr::new_delete_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/pool_options" title="cpp/memory/pool options"><span class="t-lines"><span>pmr::pool_options</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/null_memory_resource" title="cpp/memory/null memory resource"><span class="t-lines"><span>pmr::null_memory_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/synchronized_pool_resource" title="cpp/memory/synchronized pool resource"><span class="t-lines"><span>pmr::synchronized_pool_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/unsynchronized_pool_resource" title="cpp/memory/unsynchronized pool resource"><span class="t-lines"><span>pmr::unsynchronized_pool_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/monotonic_buffer_resource" title="cpp/memory/monotonic buffer resource"><span class="t-lines"><span>pmr::monotonic_buffer_resource</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><br />
+</td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Explicit_lifetime_management" title="cpp/memory">Explicit lifetime management</a></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/start_lifetime_as" title="cpp/memory/start lifetime as"><span class="t-lines"><span>start_lifetime_as</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx23">(C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/start_lifetime_as" title="cpp/memory/start lifetime as"><span class="t-lines"><span>start_lifetime_as_array</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx23">(C++23)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Types_for_composite_class_design" title="cpp/memory">Types for composite class design</a></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/indirect" title="cpp/memory/indirect"><span class="t-lines"><span>indirect</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx26">(C++26)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/polymorphic" title="cpp/memory/polymorphic"><span class="t-lines"><span>polymorphic</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx26">(C++26)</span></span></span></div></div></td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Uninitialized_storage" title="cpp/memory">Uninitialized storage</a> <span class="t-mark-rev t-until-cxx20">(until C++20)</span></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/raw_storage_iterator" title="cpp/memory/raw storage iterator"><span class="t-lines"><span>raw_storage_iterator</span></span></a></div><div><span class="t-lines"><span><span class="t-mark">(<span title="deprecated in C++17">until C++20*</span>)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/get_temporary_buffer" title="cpp/memory/get temporary buffer"><span class="t-lines"><span>get_temporary_buffer</span></span></a></div><div><span class="t-lines"><span><span class="t-mark">(<span title="deprecated in C++17">until C++20*</span>)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/return_temporary_buffer" title="cpp/memory/return temporary buffer"><span class="t-lines"><span>return_temporary_buffer</span></span></a></div><div><span class="t-lines"><span><span class="t-mark">(<span title="deprecated in C++17">until C++20*</span>)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><br />
+</td></tr>
+</tbody></table></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Garbage_collector_support" title="cpp/memory">Garbage collector support</a> <span class="t-mark-rev t-until-cxx23">(until C++23)</span></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/declare_reachable" title="cpp/memory/gc/declare reachable"><span class="t-lines"><span>declare_reachable</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/declare_no_pointers" title="cpp/memory/gc/declare no pointers"><span class="t-lines"><span>declare_no_pointers</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/pointer_safety" title="cpp/memory/gc/pointer safety"><span class="t-lines"><span>pointer_safety</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/undeclare_reachable" title="cpp/memory/gc/undeclare reachable"><span class="t-lines"><span>undeclare_reachable</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/undeclare_no_pointers" title="cpp/memory/gc/undeclare no pointers"><span class="t-lines"><span>undeclare_no_pointers</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/gc/get_pointer_safety" title="cpp/memory/gc/get pointer safety"><span class="t-lines"><span>get_pointer_safety</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span><span class="t-mark-rev t-until-cxx23">(until C++23)</span></span></span></div></div></td></tr>
+</tbody></table></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory/new#Low_level_memory_management" title="cpp/memory/new">Low level memory<br />management</a></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/operator_new" title="cpp/memory/new/operator new"><span class="t-lines"><span>operator new</span><span>operator new[]</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/operator_delete" title="cpp/memory/new/operator delete"><span class="t-lines"><span>operator delete</span><span>operator delete[]</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/nothrow_t" class="mw-redirect" title="cpp/memory/new/nothrow t"><span class="t-lines"><span>nothrow_t</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/nothrow" title="cpp/memory/new/nothrow"><span class="t-lines"><span>nothrow</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/new_handler" title="cpp/memory/new/new handler"><span class="t-lines"><span>new_handler</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/set_new_handler" title="cpp/memory/new/set new handler"><span class="t-lines"><span>set_new_handler</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/get_new_handler" title="cpp/memory/new/get new handler"><span class="t-lines"><span>get_new_handler</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/bad_alloc" title="cpp/memory/new/bad alloc"><span class="t-lines"><span>bad_alloc</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/bad_array_new_length" title="cpp/memory/new/bad array new length"><span class="t-lines"><span>bad_array_new_length</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/align_val_t" title="cpp/memory/new/align val t"><span class="t-lines"><span>align_val_t</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/new/destroying_delete_t" class="mw-redirect" title="cpp/memory/new/destroying delete t"><span class="t-lines"><span>destroying_delete_t</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/utility/launder" title="cpp/utility/launder"><span class="t-lines"><span>launder</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Smart_pointers" title="cpp/memory">Smart pointers</a></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/unique_ptr" title="cpp/memory/unique ptr"><span class="t-lines"><span>unique_ptr</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/shared_ptr" title="cpp/memory/shared ptr"><span class="t-lines"><span>shared_ptr</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/weak_ptr" title="cpp/memory/weak ptr"><span class="t-lines"><span>weak_ptr</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/auto_ptr" title="cpp/memory/auto ptr"><span class="t-lines"><span>auto_ptr</span></span></a></div><div><span class="t-lines"><span><span class="t-mark">(<span title="deprecated in C++11">until C++17*</span>)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/owner_less" title="cpp/memory/owner less"><span class="t-lines"><span>owner_less</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/owner_less_void" title="cpp/memory/owner less void"><span class="t-lines"><span>owner_less&lt;void&gt;</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/owner_hash" title="cpp/memory/owner hash"><span class="t-lines"><span>owner_hash</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx26">(C++26)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/owner_equal" title="cpp/memory/owner equal"><span class="t-lines"><span>owner_equal</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx26">(C++26)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/enable_shared_from_this" title="cpp/memory/enable shared from this"><span class="t-lines"><span>enable_shared_from_this</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/bad_weak_ptr" title="cpp/memory/bad weak ptr"><span class="t-lines"><span>bad_weak_ptr</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/default_delete" title="cpp/memory/default delete"><span class="t-lines"><span>default_delete</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/out_ptr_t" title="cpp/memory/out ptr t"><span class="t-lines"><span>out_ptr_t</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx23">(C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/inout_ptr_t" title="cpp/memory/inout ptr t"><span class="t-lines"><span>inout_ptr_t</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx23">(C++23)</span></span></span></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory#Miscellaneous" title="cpp/memory">Miscellaneous</a></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/pointer_traits" title="cpp/memory/pointer traits"><span class="t-lines"><span>pointer_traits</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/to_address" title="cpp/memory/to address"><span class="t-lines"><span>to_address</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/addressof" title="cpp/memory/addressof"><span class="t-lines"><span>addressof</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/align" title="cpp/memory/align"><span class="t-lines"><span>align</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx11">(C++11)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/assume_aligned" title="cpp/memory/assume aligned"><span class="t-lines"><span>assume_aligned</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx20">(C++20)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/is_sufficiently_aligned" title="cpp/memory/is sufficiently aligned"><span class="t-lines"><span>is_sufficiently_aligned</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx26">(C++26)</span></span></span></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5"><a href="/cpp/memory/c" title="cpp/memory/c">C Library</a></td></tr>
+<tr class="t-nv-col-table"><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/c/malloc" title="cpp/memory/c/malloc"><span class="t-lines"><span>malloc</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/c/calloc" title="cpp/memory/c/calloc"><span class="t-lines"><span>calloc</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/c/realloc" title="cpp/memory/c/realloc"><span class="t-lines"><span>realloc</span></span></a></div></div></td></tr>
+</tbody></table></div></td><td><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/c/free" title="cpp/memory/c/free"><span class="t-lines"><span>free</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/c/aligned_alloc" title="cpp/memory/c/aligned alloc"><span class="t-lines"><span>aligned_alloc</span></span></a></div><div><span class="t-lines"><span><span class="t-mark-rev t-since-cxx17">(C++17)</span></span></span></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><br />
+</td></tr>
+</tbody></table></div></td></tr>
+</tbody></table></div></td></tr>
+</tbody></table></div><div><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/navbar_content&amp;action=edit">&#91;edit&#93;</a></span></div></div></div></div><div class="t-navbar-sep">&#160;</div><div class="t-navbar-head"><a class="mw-selflink selflink"><tt>std::pmr::memory_resource</tt></a><div class="t-navbar-menu"><div><div><table class="t-nv-begin" cellpadding="0" style="">
+<tbody><tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/memory_resource" title="cpp/memory/memory resource/memory resource"><span class="t-lines"><span>memory_resource::memory_resource</span></span></a></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5">Public member functions</td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/allocate" title="cpp/memory/memory resource/allocate"><span class="t-lines"><span>memory_resource::allocate</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/deallocate" title="cpp/memory/memory resource/deallocate"><span class="t-lines"><span>memory_resource::deallocate</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/is_equal" title="cpp/memory/memory resource/is equal"><span class="t-lines"><span>memory_resource::is_equal</span></span></a></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5">Private member functions</td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/do_allocate" title="cpp/memory/memory resource/do allocate"><span class="t-lines"><span>memory_resource::do_allocate</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/do_deallocate" title="cpp/memory/memory resource/do deallocate"><span class="t-lines"><span>memory_resource::do_deallocate</span></span></a></div></div></td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/do_is_equal" title="cpp/memory/memory resource/do is equal"><span class="t-lines"><span>memory_resource::do_is_equal</span></span></a></div></div></td></tr>
+<tr class="t-nv-h2"><td colspan="5">Non-member functions</td></tr>
+<tr class="t-nv"><td colspan="5"><div class="t-nv-ln-table"><div><a href="/cpp/memory/memory_resource/operator_eq" title="cpp/memory/memory resource/operator eq"><span class="t-lines"><span>operator==</span><span>operator!=</span></span></a></div><div><span class="t-lines"><span></span><span><span class="t-mark-rev t-until-cxx20">(until C++20)</span></span></span></div></div></td></tr>
+</tbody></table></div><div><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/navbar_content&amp;action=edit">&#91;edit&#93;</a></span></div></div></div></div><div class="t-navbar-sep">&#160;</div></div>
+<table class="t-dcl-begin">
+<tbody><tr class="t-dsc-header">
+<td> <div>Defined in header <code><a href="/cpp/header/memory_resource" title="cpp/header/memory resource">&lt;memory_resource&gt;</a></code>
+ </div></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="t-dcl t-since-cxx17">
+<td> <div><div class="mw-highlight mw-highlight-lang-cpp mw-content-ltr" dir="ltr"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">memory_resource</span><span class="p">;</span>
+</pre></div></div></td>
+<td class="t-dcl-nopad">  </td>
+<td> <span class="t-mark-rev t-since-cxx17">(since C++17)</span> </td>
+</tr>
+<tr class="t-dcl-sep"><td></td><td></td><td></td></tr>
+</tbody></table>
+<p>The class <code>std::pmr::memory_resource</code> is an abstract interface to an unbounded set of classes encapsulating memory resources.
+</p>
+<div id="toc" class="toc" role="navigation" aria-labelledby="mw-toc-heading"><input type="checkbox" role="button" id="toctogglecheckbox" class="toctogglecheckbox" style="display:none" /><div class="toctitle" lang="en" dir="ltr"><h2 id="mw-toc-heading">Contents</h2><span class="toctogglespan"><label class="toctogglelabel" for="toctogglecheckbox"></label></span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Member_functions"><span class="tocnumber">1</span> <span class="toctext">Member functions</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Public_member_functions"><span class="tocnumber">1.1</span> <span class="toctext">Public member functions</span></a></li>
+<li class="toclevel-2"><a href="#Private_member_functions"><span class="tocnumber">1.2</span> <span class="toctext">Private member functions</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-2"><a href="#Non-member-functions"><span class="tocnumber">2</span> <span class="toctext">Non-member-functions</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Notes"><span class="tocnumber">3</span> <span class="toctext">Notes</span></a></li>
+</ul>
+</div>
+
+<h3><span class="mw-headline" id="Member_functions">Member functions</span></h3>
+<table class="t-dsc-begin">
+
+<tbody><tr class="t-dsc">
+<td><div class="t-dsc-member-div t-dsc-member-nobold-div"><div><a href="/cpp/memory/memory_resource/memory_resource" title="cpp/memory/memory resource/memory resource"> <span class="t-lines"><span>(constructor)</span></span></a></div><div><span class="t-lines"><span><span class="t-mark">(implicitly declared)</span></span></span></div></div>
+</td>
+<td>constructs a new <code>memory_resource</code> <br /> <span class="t-mark">(public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_constructor&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div t-dsc-member-nobold-div"><div><span class="t-lines"><span>(destructor)</span></span></div><div><span class="t-lines"><span><span class="t-cmark">[virtual]</span></span></span></div></div>
+</td>
+<td>destructs a <code>memory_resource</code> <br /> <span class="t-mark">(virtual public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_destructor&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><span class="t-lines"><span>operator=</span></span></div><div><span class="t-lines"><span><span class="t-mark">(implicitly declared)</span></span></span></div></div>
+</td>
+<td>Implicitly declared copy assignment operator <br /> <span class="t-mark">(public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_operator%3D&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+
+<tr>
+<td colspan="2"><h5><span class="mw-headline" id="Public_member_functions"> Public member functions </span></h5>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/allocate" title="cpp/memory/memory resource/allocate"> <span class="t-lines"><span>allocate</span></span></a></div></div>
+</td>
+<td>allocates memory <br /> <span class="t-mark">(public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_allocate&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/deallocate" title="cpp/memory/memory resource/deallocate"> <span class="t-lines"><span>deallocate</span></span></a></div></div>
+</td>
+<td>deallocates memory <br /> <span class="t-mark">(public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_deallocate&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/is_equal" title="cpp/memory/memory resource/is equal"> <span class="t-lines"><span>is_equal</span></span></a></div></div>
+</td>
+<td>compare for equality with another <code>memory_resource</code> <br /> <span class="t-mark">(public member function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_is_equal&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+
+<tr>
+<td colspan="2"><h5><span class="mw-headline" id="Private_member_functions"> Private member functions </span></h5>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/do_allocate" title="cpp/memory/memory resource/do allocate"> <span class="t-lines"><span>do_allocate</span></span></a></div><div><span class="t-lines"><span><span class="t-cmark">[virtual]</span></span></span></div></div>
+</td>
+<td>allocates memory<br /><span class="t-mark">(virtual private member function)</span><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_do_allocate&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/do_deallocate" title="cpp/memory/memory resource/do deallocate"> <span class="t-lines"><span>do_deallocate</span></span></a></div><div><span class="t-lines"><span><span class="t-cmark">[virtual]</span></span></span></div></div>
+</td>
+<td>deallocates memory<br /><span class="t-mark">(virtual private member function)</span><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_do_deallocate&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+
+<tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/do_is_equal" title="cpp/memory/memory resource/do is equal"> <span class="t-lines"><span>do_is_equal</span></span></a></div><div><span class="t-lines"><span><span class="t-cmark">[virtual]</span></span></span></div></div>
+</td>
+<td>compare for equality with another <code>memory_resource</code><br /><span class="t-mark">(virtual private member function)</span><span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_do_is_equal&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+</tbody></table>
+<h3><span class="mw-headline" id="Non-member-functions">Non-member-functions</span></h3>
+<table class="t-dsc-begin">
+
+<tbody><tr class="t-dsc">
+<td><div class="t-dsc-member-div"><div><a href="/cpp/memory/memory_resource/operator_eq" title="cpp/memory/memory resource/operator eq"> <span class="t-lines"><span>operator==</span><span>operator!=</span></span></a></div><div><span class="t-lines"><span></span><span><span class="t-mark-rev t-until-cxx20">(removed in C++20)</span></span></span></div></div>
+</td>
+<td>compare two <code>memory_resource</code>s <br /> <span class="t-mark">(function)</span> <span class="editsection noprint plainlinks" title="Edit this template"><a rel="nofollow" class="external text" href="https://cppreference.com/index.php?title=Template:cpp/memory/memory_resource/dsc_operator_eq&amp;action=edit">&#91;edit&#93;</a></span>
+</td></tr>
+</tbody></table>
+<h3><span class="mw-headline" id="Notes">Notes</span></h3>
+<table class="wikitable ftm-begin">
+
+<tbody><tr>
+<th><a href="/cpp/utility/feature_test" title="cpp/utility/feature test">Feature-test</a> macro</th>
+<th><abbr title="The year/month in which the feature was adopted. The hyperlink under each value opens a compiler support page with entry for given feature.">Value</abbr></th>
+<th><abbr title="Standard in which the feature is introduced; DR means defect report against that revision">Std</abbr></th>
+<th>Feature
+</th></tr>
+<tr>
+<td><a href="/cpp/feature_test#cpp_lib_memory_resource" title="cpp/feature test"><code>__cpp_lib_memory_resource</code></a></td>
+<td><a href="/cpp/compiler_support/17#cpp_lib_memory_resource_201603L" title="cpp/compiler support/17"><code>201603L</code></a></td>
+<td><span class="t-mark">(C++17)</span></td>
+<td><code>std::pmr::memory_resource</code>
+</td></tr></tbody></table>
+<!-- 
+NewPP limit report
+Cached time: 20260421202108
+Cache expiry: 2592000
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.137 seconds
+Real time usage: 0.232 seconds
+Preprocessor visited node count: 10938/1000000
+Post‐expand include size: 353040/4194304 bytes
+Template argument size: 67317/4194304 bytes
+Highest expansion depth: 24/100
+Expensive parser function count: 1/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 267/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  189.762      1 -total
+ 58.31%  110.648      1 Template:cpp/memory/memory_resource/navbar
+ 57.88%  109.840      1 Template:navbar
+ 42.05%   79.802      1 Template:cpp/memory/navbar_content
+ 38.89%   73.796    133 Template:nv
+ 31.46%   59.691     98 Template:nv_ln
+ 26.29%   49.888     10 Template:dsc_inc
+ 13.75%   26.090     10 Template:dsc
+  9.32%   17.693      1 Template:cpp/navbar_content
+  8.70%   16.512      1 Template:cpp/memory/memory_resource/dsc_destructor
+-->
+
+<!-- Saved in parser cache with key en:pcache:idhash:14898-0!canonical and timestamp 20260421202108 and revision id 155180. Rendering was triggered because: page-view
+ -->
+</div></div>
+            <!-- /bodycontent -->
+            <!-- catlinks -->
+            <div id="catlinks" class="catlinks catlinks-allhidden" data-mw="interface"></div>            <!-- /catlinks -->
+            <div class="visualClear"></div>
+            <!-- debughtml -->
+                        <!-- /debughtml -->
+        </div>
+        <!-- /bodyContent -->
+    </div>
+</div>
+<!-- /content -->
+
+<!-- footer -->
+<div id="cpp-footer-base" class="noprint">
+    <div id="footer" lang="en" dir="ltr">
+        <!-- navigation -->
+        <div id="cpp-navigation">
+            <h5>Navigation</h5>
+            <ul>
+                <li id="n-Support-us" class="mw-list-item"><a href="http://www.cppreference.com/support" rel="nofollow"><span>Support us</span></a></li>                <li id="n-recentchanges" class="mw-list-item"><a href="/Special:RecentChanges" title="A list of recent changes in the wiki [r]" accesskey="r"><span>Recent changes</span></a></li>                <li id="n-FAQ" class="mw-list-item"><a href="/Cppreference:FAQ"><span>FAQ</span></a></li>                <li id="n-Offline-version" class="mw-list-item"><a href="/Cppreference:Archives"><span>Offline version</span></a></li>            </ul>
+        </div>
+        <!-- toolbox -->
+        <div id="cpp-toolbox">
+            <h5><span>Tools</span><a href="#"></a></h5>
+            <ul>
+                <li id="t-whatlinkshere" class="mw-list-item"><a href="/Special:WhatLinksHere/cpp/memory/memory_resource" title="A list of all wiki pages that link here [j]" accesskey="j"><span>What links here</span></a></li>                <li id="t-recentchangeslinked" class="mw-list-item"><a href="/Special:RecentChangesLinked/cpp/memory/memory_resource" rel="nofollow" title="Recent changes in pages linked from this page [k]" accesskey="k"><span>Related changes</span></a></li>                <li id="t-upload" class="mw-list-item"><a href="http://upload.cppreference.com/w/Special:Upload" title="Upload files [u]" accesskey="u"><span>Upload file</span></a></li>                <li id="t-specialpages" class="mw-list-item"><a href="/Special:SpecialPages" title="A list of all special pages [q]" accesskey="q"><span>Special pages</span></a></li>                <li id="t-print" class="mw-list-item"><a href="javascript:print();" rel="alternate" title="Printable version of this page [p]" accesskey="p"><span>Printable version</span></a></li>                <li id="t-permalink" class="mw-list-item"><a href="/index.php?title=cpp/memory/memory_resource&amp;oldid=155180" title="Permanent link to this revision of this page"><span>Permanent link</span></a></li>                <li id="t-info" class="mw-list-item"><a href="/index.php?title=cpp/memory/memory_resource&amp;action=info" title="More information about this page"><span>Page information</span></a></li>            </ul>
+        </div>
+        <!-- languages -->
+        <div id="cpp-languages">
+            <div><ul><li>In other languages</li></ul></div>
+            <div><ul>
+                <li class="interlanguage-link interwiki-es mw-list-item"><a href="http://es.cppreference.com/cpp/memory/memory_resource" title="cpp/memory/memory resource – español" lang="es" hreflang="es" data-title="cpp/memory/memory resource" data-language-autonym="Español" data-language-local-name="español" class="interlanguage-link-target"><span>Español</span></a></li>                <li class="interlanguage-link interwiki-ja mw-list-item"><a href="http://ja.cppreference.com/cpp/memory/memory_resource" title="cpp/memory/memory resource – 日本語" lang="ja" hreflang="ja" data-title="cpp/memory/memory resource" data-language-autonym="日本語" data-language-local-name="日本語" class="interlanguage-link-target"><span>日本語</span></a></li>                <li class="interlanguage-link interwiki-ru mw-list-item"><a href="http://ru.cppreference.com/cpp/memory/memory_resource" title="cpp/memory/memory resource – русский" lang="ru" hreflang="ru" data-title="cpp/memory/memory resource" data-language-autonym="Русский" data-language-local-name="русский" class="interlanguage-link-target"><span>Русский</span></a></li>                <li class="interlanguage-link interwiki-zh mw-list-item"><a href="http://zh.cppreference.com/cpp/memory/memory_resource" title="cpp/memory/memory resource – 中文" lang="zh" hreflang="zh" data-title="cpp/memory/memory resource" data-language-autonym="中文" data-language-local-name="中文" class="interlanguage-link-target"><span>中文</span></a></li>            </ul></div>
+        </div>
+        <!-- footer links -->
+        <div style="clear:both"></div>
+    </div>
+</div>
+<!-- /footer -->
+
+<script>(RLQ=window.RLQ||[]).push(function(){mw.config.set({"wgBackendResponseTime":393,"wgPageParseReport":{"limitreport":{"cputime":"0.137","walltime":"0.232","ppvisitednodes":{"value":10938,"limit":1000000},"postexpandincludesize":{"value":353040,"limit":4194304},"templateargumentsize":{"value":67317,"limit":4194304},"expansiondepth":{"value":24,"limit":100},"expensivefunctioncount":{"value":1,"limit":100},"unstrip-depth":{"value":0,"limit":20},"unstrip-size":{"value":267,"limit":5000000},"timingprofile":["100.00%  189.762      1 -total"," 58.31%  110.648      1 Template:cpp/memory/memory_resource/navbar"," 57.88%  109.840      1 Template:navbar"," 42.05%   79.802      1 Template:cpp/memory/navbar_content"," 38.89%   73.796    133 Template:nv"," 31.46%   59.691     98 Template:nv_ln"," 26.29%   49.888     10 Template:dsc_inc"," 13.75%   26.090     10 Template:dsc","  9.32%   17.693      1 Template:cpp/navbar_content","  8.70%   16.512      1 Template:cpp/memory/memory_resource/dsc_destructor"]},"cachereport":{"timestamp":"20260421202108","ttl":2592000,"transientcontent":false}}});});</script>
+</body>
+<!-- Cached 20260421202108 -->
+</html>
