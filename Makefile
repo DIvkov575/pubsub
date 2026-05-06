@@ -1,11 +1,12 @@
+CXX := g++
+CXXFLAGS := -std=c++23 -O0 -Wall -g
+
+TESTS := arena pool pmr hugepage
+
+.PHONY: clean $(TESTS:%=test-%)
 
 clean:
-	rm *.dSYM *.out
+	rm -rf *.dSYM *.out
 
-
-test-arena: ./allocators/arena.hpp ./test/arena_test.cpp
-	g++ -std=c++23 -g -o0 -o test-arena ./test/arena_test.cpp && ./test-arena
-
-
-test-pool: ./allocators/pool.hpp ./test/pool_test.cpp
-	g++ -std=c++23 -g -o0 -o test-pool ./test/pool_test.cpp && ./test-pool
+test-%: ./test/%_test.cpp
+	$(CXX) $(CXXFLAGS) -o $@.out $< && ./$@.out
