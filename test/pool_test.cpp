@@ -1,36 +1,65 @@
 #include "../allocators/pool.hpp"
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 
 int main() {
-    constexpr size_t N = 5;
-    Pool<sizeof(size_t), N> pool;
+    constexpr size_t N         = 8;
+    constexpr size_t slot_size = sizeof(uint64_t);
+    Pool<slot_size, N> pool;
 
     assert(pool.available() == N);
 
+    // --- acquire all slots ---
     void* slots[N];
     for (size_t i = 0; i < N; ++i) {
         slots[i] = pool.acquire();
         assert(slots[i] != nullptr);
+        assert(pool.available() == N - i - 1);
     }
+
+    // --- exhaustion returns nullptr ---
+    assert(pool.acquire() == nullptr);
     assert(pool.available() == 0);
 
-    assert(pool.acquire() == nullptr);
-
+    // --- all addresses are distinct ---
     for (size_t i = 0; i < N; ++i)
         for (size_t j = i + 1; j < N; ++j)
             assert(slots[i] != slots[j]);
 
+    // --- slots are uniformly strided (SlotSize = align_up(8, 16) = 16) ---
+    constexpr size_t expected_stride = align_up(slot_size, alignof(std::max_align_t));
+    for (size_t i = 0; i + 1 < N; ++i) {
+        uintptr_t a = reinterpret_cast<uintptr_t>(slots[i]);
+        uintptr_t b = reinterpret_cast<uintptr_t>(slots[i + 1]);
+        assert(a > b);                  // LIFO: acquired in descending address order
+        assert(a - b == expected_stride);
+    }
+
+    // --- slots are writable and hold values correctly ---
+    for (size_t i = 0; i < N; ++i)
+        *static_cast<uint64_t*>(slots[i]) = i * 0xDEAD;
+    for (size_t i = 0; i < N; ++i)
+        assert(*static_cast<uint64_t*>(slots[i]) == i * 0xDEAD);
+
+    // --- LIFO: release one, reacquire gives same slot ---
     pool.release(slots[0]);
     assert(pool.available() == 1);
-    void* reacquired = pool.acquire();
-    assert(reacquired == slots[0]);
+    void* back = pool.acquire();
+    assert(back == slots[0]);
     assert(pool.available() == 0);
 
-    for (size_t i = 0; i < N; ++i) pool.release(slots[i]);
-    assert(pool.available() == N);
-    for (size_t i = 0; i < N; ++i) assert(pool.acquire() != nullptr);
-    assert(pool.available() == 0);
+    // --- multi-cycle: release all, drain, repeat ---
+    for (int cycle = 0; cycle < 3; ++cycle) {
+        for (size_t i = 0; i < N; ++i) pool.release(slots[i]);
+        assert(pool.available() == N);
+        for (size_t i = 0; i < N; ++i) {
+            void* p = pool.acquire();
+            assert(p != nullptr);
+        }
+        assert(pool.available() == 0);
+        assert(pool.acquire() == nullptr);
+    }
 
-    std::cout << "pool: all tests passed\n";
+    std::cout << "pool: all tests passed (stride=" << expected_stride << ")\n";
 }
