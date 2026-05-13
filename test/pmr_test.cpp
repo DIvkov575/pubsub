@@ -22,7 +22,6 @@ int main() {
     constexpr size_t capacity = 8192;
     std::byte* buf = static_cast<std::byte*>(std::malloc(capacity));
 
-    // --- ArenaPmrResource: vector uses no global new ---
     {
         Arena arena(buf, capacity);
         ArenaPmrResource rsrc(arena);
@@ -35,12 +34,9 @@ int main() {
 
         assert(global_new_count == 0);
         for (int i = 0; i < 128; ++i) assert(v[i] == i);
-
-        // storage is inside the arena backing buffer
         assert(reinterpret_cast<std::byte*>(v.data()) >= buf);
         assert(reinterpret_cast<std::byte*>(v.data()) <  buf + capacity);
 
-        // --- arena reset + reuse: second vector gets same memory, no global new ---
         rsrc.reset();
         global_new_count = 0;
 
@@ -49,11 +45,10 @@ int main() {
         for (int i = 0; i < 128; ++i) v2.push_back(i * 2);
 
         assert(global_new_count == 0);
-        assert(v2.data() == v.data()); // same base address after reset
+        assert(v2.data() == v.data());
         for (int i = 0; i < 128; ++i) assert(v2[i] == i * 2);
     }
 
-    // --- PoolPmrResource: allocate/deallocate through pmr interface ---
     {
         constexpr size_t SlotSize  = 64;
         constexpr size_t SlotCount = 16;
