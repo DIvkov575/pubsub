@@ -1,5 +1,5 @@
 CXX      := g++
-CXXFLAGS := -std=c++23 -O0 -Wall -g
+CXXFLAGS := -std=c++26 -O0 -Wall -g
 
 TESTS := arena pool pmr hugepage spsc mpmc
 
@@ -13,4 +13,10 @@ clean:
 test-%: FORCE
 	$(CXX) $(CXXFLAGS) -o $@.out ./test/$*_test.cpp && ./$@.out
 
+vtest-%: FORCE
+	$(CXX) $(CXXFLAGS) -DVERBOSE_TEST=1 -o $@.out ./test/$*_test.cpp && ./$@.out
+
 FORCE:
+
+
+
