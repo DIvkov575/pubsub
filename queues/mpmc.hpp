@@ -1,8 +1,14 @@
+#ifndef VERBOSE_TEST
+#define VERBOSE_TEST 0
+#endif
+
 #include <cstddef>
 #include <memory>
 #include <atomic>
 #include <bit>
 #include <cstdint>
+
+#include<iostream>
 
 template<typename T, std::size_t Capacity>
 class MPMCQueue {
@@ -22,22 +28,28 @@ private:
     alignas(64) std::atomic<uint64_t> dequeue_pos_{0};
 
 public:
+    MPMCQueue() {
+      for (int i = 0; i < Capacity; ++i) {
+        slots_[i].sequence = i;
+      }
+    }
+
 
     bool try_push(const T& item) {
 
         uint64_t didx, idx, pos;
 
         while (true) {
-
             idx = enqueue_pos_.load();
             didx = dequeue_pos_.load();
 
-            if ((idx - didx) % (Capacity - 1) == 0 && (idx > didx)) 
+            if ((idx - didx) % (Capacity) == 0 && (idx > didx)) 
               return false; // capcity
 
             pos = idx & (Capacity - 1);
 
             // if (idx != slots_[pos].sequence.load(std::memory_order_acquire))
+
             if (idx != slots_[pos].sequence.load())
                 continue;
 

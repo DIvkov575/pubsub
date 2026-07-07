@@ -9,6 +9,8 @@
 #include "../queues/mpmc.hpp"
 #include <cassert>
 #include <iostream>
+#include <print>
+#include <thread>
 
 static void test_empty() {
     MPMCQueue<int, 8> q;
@@ -75,14 +77,35 @@ static void test_interleaved() {
     }
 }
 
+static void test_interleaved_mt() {
+    MPMCQueue<int, 1024> q;
+    std::thread t1([&q](){
+      for (int i = 0; i < 64; ++i) { 
+      assert(q.try_push(i));
+      } 
+      for (int i = 0; i < 64; ++i) { 
+      assert(q.try_pop(i));
+      } 
+    });
+    std::thread t2([&q](){
+      for (int i = 0; i < 64; ++i) { 
+      assert(q.try_push(i));
+      } 
+      for (int i = 0; i < 64; ++i) { 
+      assert(q.try_pop(i));
+      } 
+    });
+
+    t1.join();
+    t2.join();
+}
+
 int main() {
-
-  
-
     std::cout << "mpmc test" << std::endl;
-    // test_empty();
+    test_empty();
     test_fill_and_drain();
-    // test_wraparound();
-    // test_interleaved();
+    test_wraparound();
+    test_interleaved(); std::cout << "interleaved done \n";
+    test_interleaved_mt(); std::cout << "interleaved mt done \n";
     std::cout << "mpmc: all single-threaded tests passed\n";
 }
