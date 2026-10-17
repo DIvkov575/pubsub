@@ -59,14 +59,16 @@ class Client {
 
 
 int main(void) {
+  std::vector<std::jthread> threads;
 
-  for (int i = 0; i < 2; ++i) {
-    std::jthread t([i]{
-      Client client;
-      client.connect();
-      std::string s = std::format("hello from thread {}", i);
-      client.sendb(std::as_bytes(std::span{s}), 5);
-    });
+  for (int i = 0; i < 5; ++i) {
+    threads.emplace_back(
+      [i](){
+        Client client;
+        client.connect();
+        std::string s = std::format("hello from thread {}", i);
+        client.sendb(std::as_bytes(std::span{s}), 5);
+      });
   }
 
 

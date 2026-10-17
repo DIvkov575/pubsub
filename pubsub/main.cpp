@@ -38,13 +38,19 @@ void *get_in_addr(struct sockaddr *sa) {
 
 
 
-void poll_socket(int fd) {
+void *poll_socket(void *arg) {
+  int fd = (int)(intptr_t)arg;
   while (1) {
       char buf[50];
-      if (recv(fd, buf, sizeof buf, 0) == -1) {
+      ssize_t n = recv(fd, buf, sizeof buf, 0);
+      if (n < 0) {
         printf("error lowk\n");
+        return nullptr;
+      } else if (n == 0) {
+        printf("connection closed\n");
+        return nullptr;
       } else {
-        printf("%s\n", buf);
+        printf("%.*s\n", (int)n, buf);
       }
   }
 
@@ -86,7 +92,7 @@ int main(void) {
 
 
         pthread_t thread_id;
-        pthread_create(&thread_id, nullptr, (void *(*)(void *))&poll_socket, &new_fd);
+        pthread_create(&thread_id, nullptr, poll_socket, (void *)(intptr_t)new_fd);
 
         // char buf[50];
         // if (recv(new_fd, buf, sizeof buf, 0) == -1) {
