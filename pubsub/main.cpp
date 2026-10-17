@@ -30,6 +30,7 @@
 
 #define MYPORT "3490"  
 #define BACKLOG 10    
+#define MAXMESSAGESIZE 128
 
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) { return &(((struct sockaddr_in*)sa)->sin_addr); }
@@ -38,23 +39,37 @@ void *get_in_addr(struct sockaddr *sa) {
 
 
 
-void *poll_socket(void *arg) {
-  int fd = (int)(intptr_t)arg;
-  while (1) {
-      char buf[50];
-      ssize_t n = recv(fd, buf, sizeof buf, 0);
-      if (n < 0) {
-        printf("error lowk\n");
-        return nullptr;
-      } else if (n == 0) {
-        printf("connection closed\n");
-        return nullptr;
-      } else {
-        printf("%.*s\n", (int)n, buf);
-      }
+
+class Queue {
+  public:
+    virtual publish(std::span<const std::byte> msg);
+    virtual consume();
+}
+
+class Pubsub {
+  Queue q;
+  
+
+  public:
+  Pubsub() {
+
+  }
+
+  void process_socket(int fd) {
+    char buf[128];
+    if (recv(fd, buf, sizeof buf, 0) == -1) {
+      printf("error with processing socket %d\n", fd);
+    } else {
+      printf("%s\n", buf);
+
+
+      q.publish(std::as_bytes(buf));
+    }
+
   }
 
 }
+
 
 
 int main(void) {
@@ -76,32 +91,60 @@ int main(void) {
 
 
 
+    std::vector<pollfd> fds;
+    fds.push_back({sockfd, POLLIN});
 
-    char s[INET6_ADDRSTRLEN];
-    while(1) {  // main accept() loop
-        socklen_t sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr,
-            &sin_size);
+
+    while (1) {
+      int ready = poll(fds.data(), fds.size(), 1000);
+
+      for (size_t i = 1; i < fds.size() && read > 0; ++i) {
+        if (fds[i].revents == 0) continue;
+        --ready;
+
+        void process_socket(fds[i].fd);
+
+      }
+
+
+      if (ready[0] == POLLIN) {
+        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
         if (new_fd == -1) {
-            perror("accept");
+            perror("error in accepting new connection");
             continue;
         }
+        fds.push_back({new_fd, POLLIN})
+      }
 
-        inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-        printf("server: got connection from %s\n", s);
-
-
-        pthread_t thread_id;
-        pthread_create(&thread_id, nullptr, poll_socket, (void *)(intptr_t)new_fd);
-
-        // char buf[50];
-        // if (recv(new_fd, buf, sizeof buf, 0) == -1) {
-        //   printf("error lowk\n");
-        // } else {
-        //   printf("%s\n", buf);
-        // }
-        // close(new_fd);  // parent doesn't need this
     }
+
+
+
+    // char s[INET6_ADDRSTRLEN];
+    // while(1) {  // main accept() loop
+    //     socklen_t sin_size = sizeof their_addr;
+    //     new_fd = accept(sockfd, (struct sockaddr *)&their_addr,
+    //         &sin_size);
+    //     if (new_fd == -1) {
+    //         perror("accept");
+    //         continue;
+    //     }
+    //
+    //     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+    //     printf("server: got connection from %s\n", s);
+    //
+    //
+    //     pthread_t thread_id;
+    //     pthread_create(&thread_id, nullptr, poll_socket, (void *)(intptr_t)new_fd);
+    //
+    //     // char buf[50];
+    //     // if (recv(new_fd, buf, sizeof buf, 0) == -1) {
+    //     //   printf("error lowk\n");
+    //     // } else {
+    //     //   printf("%s\n", buf);
+    //     // }
+    //     // close(new_fd);  // parent doesn't need this
+    // }
 
 
 }
